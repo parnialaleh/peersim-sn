@@ -6,4 +6,4 @@ For more informations see [http://disi.unitn.it/~montreso here].
 
 
 = Documentation =
-  * EclipseSVN : brief how-touse google code with eclipse
+  * [EclipseSVN] : brief how-touse google code with eclipse
