@@ -1,0 +1,9 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+Here you can find the source of my thesis regarding distributed social networks.
+For more informations see [http://disi.unitn.it/~montreso here].
+
+
+= Documentation =
+  * EclipseSVN : brief how-touse google code with eclipse
