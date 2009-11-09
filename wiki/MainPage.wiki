@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Main Page
 
 = Introduction =
 Here you can find the source of my thesis regarding distributed social networks.
