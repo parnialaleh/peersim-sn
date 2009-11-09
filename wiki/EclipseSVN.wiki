@@ -1,8 +1,23 @@
 #summary Google Code with Ecplipe
 
-= Installation Instructions =
+== Installation Instructions ==
   * Install [http://subclipse.tigris.org/ Subclipse] for Eclipse
-  * 
+
+== New SVN Project with Ecplise ==
+In Ecplise select
+  * File -> New -> Other
+  * SVN -> Checkout Project from SVN
+  * Create a new repository location and then press _Next_
+  * As URL insert e.g. `https://peersim-sn.googlecode.com/svn` and then press _Next_
+  * When prompted insert the username and the password that you can find in the _Source_ tab of the google code project
+  * Select the _trunk_ folder and then _Next_
+  * Leave the default values and press _Finish_
+
+== New Project ==
+Now you can create the new project
+  * Select _Java Project_ and press _Next_
+  * Insert the project name (e.g. _Peersim SN_) and optionally select the location
+
 
 ------
 Back to [MainPage home]
