@@ -3,3 +3,6 @@
 = Installation Instructions =
   * Install [http://subclipse.tigris.org/ Subclipse] for Eclipse
   * 
+
+---
+Back to [MainPage home]
