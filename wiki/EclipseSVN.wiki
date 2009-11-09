@@ -1,0 +1,5 @@
+#summary Google Code with Ecplipe
+
+= Installation Instructions =
+  * Install [http://subclipse.tigris.org/ Subclipse] for Eclipse
+  * 
