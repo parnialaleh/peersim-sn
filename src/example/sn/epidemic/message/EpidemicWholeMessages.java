@@ -1,4 +1,4 @@
-package example.sn.message;
+package example.sn.epidemic.message;
 
 import java.util.List;
 

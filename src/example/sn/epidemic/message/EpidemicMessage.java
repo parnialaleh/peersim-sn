@@ -1,4 +1,4 @@
-package example.sn.message;
+package example.sn.epidemic.message;
 
 import peersim.core.CommonState;
 import peersim.core.Node;
@@ -8,11 +8,13 @@ public abstract class EpidemicMessage extends InfectionMessage implements Compar
 {
 	private int eventTime = 0;
 	private long nodeID = 0;
+	private boolean isHash = false;
 	
-	public EpidemicMessage(boolean status, Node n) {
+	public EpidemicMessage(boolean status, boolean isHash, Node n) {
 		super(status);
 		this.eventTime = CommonState.getIntTime();
 		this.nodeID = n.getID();
+		this.isHash = isHash;
 	}
 	
 	public int getEventTime()
@@ -23,6 +25,16 @@ public abstract class EpidemicMessage extends InfectionMessage implements Compar
 	public long getID()
 	{
 		return this.nodeID;
+	}
+	
+	public boolean isHash()
+	{
+		return this.isHash;
+	}
+	
+	public void setHash(boolean isHash)
+	{
+		this.isHash = isHash;
 	}
 	
 	public int compareTo(EpidemicMessage message)
