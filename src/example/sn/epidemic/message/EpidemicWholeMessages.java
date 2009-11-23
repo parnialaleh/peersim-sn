@@ -2,20 +2,20 @@ package example.sn.epidemic.message;
 
 import java.util.List;
 
-import peersim.extras.am.epidemic.bcast.InfectionMessage;
+import peersim.core.Node;
 
-public class EpidemicWholeMessages extends InfectionMessage
+public class EpidemicWholeMessages extends EpidemicMessage
 {
-
-	private List<EpidemicMessage> messages = null;
+	private List<News> messages = null;
 	
-	public EpidemicWholeMessages(boolean status,  List<EpidemicMessage> messages)
+	public EpidemicWholeMessages(boolean status,  List<News> messages, Node n)
 	{
-		super(status);
+		super(status, false, n);
 		this.messages = messages;
 	}
 
-	public List<EpidemicMessage> getMessages() {
+	public List<News> getMessages()
+	{
 		return messages;
 	}
 	

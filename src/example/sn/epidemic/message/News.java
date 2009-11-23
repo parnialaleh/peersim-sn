@@ -2,12 +2,12 @@ package example.sn.epidemic.message;
 
 import peersim.core.CommonState;
 
-public abstract class New
+public abstract class News
 {
 	
 	private int eventTime = 0;
 	
-	public New()
+	public News()
 	{
 		this.eventTime = CommonState.getIntTime();
 	}

@@ -1,7 +1,7 @@
 package example.sn.epidemic.message;
 
 
-public class NewFriendshipMessage extends New
+public class NewFriendshipMessage extends News
 {
 	private int sourceID;
 	private int destId;
