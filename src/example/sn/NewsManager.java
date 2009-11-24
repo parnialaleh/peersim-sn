@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import peersim.config.Configuration;
+import peersim.core.IdleProtocol;
+import peersim.core.Network;
 import peersim.core.Node;
+import peersim.dynamics.WireKOut;
 import peersim.edsim.EDProtocol;
 
-import example.sn.message.EpidemicMessage;
+import example.sn.epidemic.message.News;
+import example.sn.epidemic.message.NewsFriendship;
 
 /**
  * Class to manage all news.
@@ -17,12 +22,19 @@ import example.sn.message.EpidemicMessage;
  */
 public class NewsManager implements EDProtocol
 {
-
-	private List<EpidemicMessage> news = null;
+	private static final String PAR_IDLE_MANAGER = "protocol.idle";
+	private static final String PAR_NETWORK_MANAGER = "protocol.network_manager";
 	
-	public NewsManager()
+	protected final int pidNetworkManger;
+	protected final int pidIdle;
+	
+	private List<News> news = null;
+	
+	public NewsManager(String n)
 	{
-		this.news = new ArrayList<EpidemicMessage>();
+		this.pidNetworkManger = Configuration.getPid(n + "." + PAR_NETWORK_MANAGER);
+		this.pidIdle = Configuration.getPid(n + "." + PAR_IDLE_MANAGER);
+		this.news = new ArrayList<News>();
 	}
 	
 	public Object clone()
@@ -30,27 +42,37 @@ public class NewsManager implements EDProtocol
 		NewsManager nm = null;
 		try { nm = (NewsManager) super.clone(); }
 		catch( CloneNotSupportedException e ) {} // never happens
-		nm.news = new ArrayList<EpidemicMessage>();
+		nm.news = new ArrayList<News>();
 
 		return nm;
 	}
 	
-	public void addNews(EpidemicMessage news)
+
+	public void addNews(News news, Node n)
 	{
 		this.news.add(news);
+		if (news instanceof NewsFriendship)
+			((NewscastED)n.getProtocol(pidNetworkManger)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
 	}
 	
-	public List<EpidemicMessage> getNews()
+	public List<News> getNews(Node lnode, Node rnode)
 	{
-		return this.news;
+		List<News> list = new ArrayList<News>();
+		
+		for (News n: news)
+			if (n.getNode().getID() == lnode.getID() || ((NewscastED)n.getNode().getProtocol(pidNetworkManger)).contains(n.getNode()) || ((IdleProtocol)n.getNode().getProtocol(pidNetworkManger)).contains(n.getNode()))
+				list.add(n);
+				
+		
+		return list;
 	}
 	
-	public EpidemicMessage getNews(int index)
+	public News getNews(int index)
 	{
 		return this.news.get(index);
 	}
 	
-	public boolean merge(List<EpidemicMessage> messages)
+	public boolean merge(List<News> messages)
 	{
 		boolean addSomething = this.news.addAll(messages);
 		Collections.sort(this.news);
