@@ -57,7 +57,8 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 				tr.send(lnode, msg.getSender(), reply, thisPid);
 			}
 		}
-		lpeer.merge(lnode, msg.getSender(), msg);
+		if (!msg.isHash())
+			lpeer.merge(lnode, msg.getSender(), msg);
 	}
 	
 }
