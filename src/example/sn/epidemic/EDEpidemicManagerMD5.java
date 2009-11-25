@@ -11,9 +11,9 @@ import peersim.transport.Transport;
 public class EDEpidemicManagerMD5 extends EDEpidemicManager
 {
 
-	protected EDEpidemicManagerMD5(EDEpidemicManager e)
+	public EDEpidemicManagerMD5(String n)
 	{
-		super(e);
+		super(n);
 	}
 	
 	public void processEvent(Node lnode, int thisPid, Object event)
