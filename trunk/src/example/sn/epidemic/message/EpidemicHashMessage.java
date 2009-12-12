@@ -4,8 +4,9 @@ public class EpidemicHashMessage extends EpidemicMessage
 {
 	private int hashcode = 0;
 
-	public EpidemicHashMessage(boolean status, int hashcode) {
-		super(status, true);
+
+	public EpidemicHashMessage(boolean status, int hashcode, boolean request) {
+		super(status, true, request);
 		this.hashcode = hashcode;
 	}
 	
@@ -13,6 +14,5 @@ public class EpidemicHashMessage extends EpidemicMessage
 	{
 		return this.hashcode;
 	}
-
 
 }

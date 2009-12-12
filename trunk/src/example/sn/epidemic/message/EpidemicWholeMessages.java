@@ -6,9 +6,9 @@ public class EpidemicWholeMessages extends EpidemicMessage
 {
 	private List<News> messages = null;
 	
-	public EpidemicWholeMessages(boolean status,  List<News> messages)
+	public EpidemicWholeMessages(boolean status,  List<News> messages, boolean request)
 	{
-		super(status, false);
+		super(status, false, request);
 		this.messages = messages;
 	}
 

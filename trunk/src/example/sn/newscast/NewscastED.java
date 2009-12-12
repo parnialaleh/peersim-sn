@@ -1,7 +1,10 @@
-package example.sn;
+package example.sn.newscast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -37,32 +40,6 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 
 	private final boolean ff_communication;
 	private final int idle_protocol;
-
-	private class NodeEntry implements Comparable<NodeEntry>
-	{
-		public Node n = null;
-		public int ts = -1;
-		public int type = 0;
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			return ((NodeEntry)obj).n.equals(n);
-			//			if (((NodeEntry)obj).n.equals(n))
-			//				return ((NodeEntry)obj).ts < ts; //obj is different from this if it is freshness than this
-			//			return false;
-		}
-
-		public int compareTo(NodeEntry node)
-		{
-			if (node.ts > ts)
-				return -1;
-			else if (node.ts < ts)
-				return 1;
-
-			return 0;
-		}
-	} 
 
 	/** Temp array for merging. Its size is the same as the cache size. */
 	private static NodeEntry[] tn;
@@ -164,9 +141,15 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 		NodeEntry peerFriends[] = peer.getFriends();
 
 		//merge only with the peer friends that I already know
-		HashSet<NodeEntry> tmp = new HashSet<NodeEntry>(Arrays.asList(peerFriends));
-		tmp.retainAll(Arrays.asList(cache));
-		peerFriends = (NodeEntry[])tmp.toArray();
+		//HashSet<NodeEntry> tmp = new HashSet<NodeEntry>(Arrays.asList(peerFriends));
+	
+		int k = 0;
+		for (k=cache.length-1; cache[k] == null && k > 0; k--);
+		NodeEntry lcache[] = new NodeEntry[++k];
+		System.arraycopy(cache, 0, lcache, 0, k);
+		
+		//tmp.retainAll(Arrays.asList(lcache));
+		//peerFriends = tmp.toArray(new NodeEntry[0]);
 
 		final int d1 = degree();
 		final int d2 = peerFriends.length;
@@ -175,10 +158,10 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 
 		// merging two arrays
 		while (i < cache.length && i1 < d1 && i2 < d2) {
-			if (cache[i1].ts == peer.cache[i2].ts) {
+			if (cache[i1].ts == peerFriends[i2].ts) {
 				lastTieWinner = first = !lastTieWinner;
 			} else {
-				first = cache[i1].ts > peer.cache[i2].ts;
+				first = cache[i1].ts > peerFriends[i2].ts;
 			}
 
 			if (first) {
@@ -188,9 +171,9 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 				}
 				i1++;
 			} else {
-				if (peer.cache[i2].n != thisNode
-						&& !NewscastED.contains(i, peer.cache[i2].n, NewscastED.tn)) {
-					NewscastED.tn[i] = peer.cache[i2];
+				if (peerFriends[i2].n != thisNode
+						&& !NewscastED.contains(i, peerFriends[i2].n, NewscastED.tn)) {
+					NewscastED.tn[i] = peerFriends[i2];
 					//if current node has peer.cache[i2].n in its cache then it is a friend otherwise a friend of a friend
 					NewscastED.tn[i].type = NewscastED.contains(cache.length, cache[i1].n, cache)? FRIEND : FRIEND_FRIEND;
 					i++;
@@ -213,9 +196,9 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 			}
 
 			for (; i2 < d2 && i < cache.length; ++i2) {
-				if (peer.cache[i2].n != thisNode
-						&& !NewscastED.contains(i, peer.cache[i2].n, NewscastED.tn)) {
-					NewscastED.tn[i] = peer.cache[i2];
+				if (peerFriends[i2].n != thisNode
+						&& !NewscastED.contains(i, peerFriends[i2].n, NewscastED.tn)) {
+					NewscastED.tn[i] = peerFriends[i2];
 					i++;
 				}
 			}
@@ -239,16 +222,17 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 		return false;
 	}
 
-	private NodeEntry[] getFriends()
+	public NodeEntry[] getFriends()
 	{
-		NodeEntry friends[] = new NodeEntry[cache.length];
+		List<NodeEntry> friends = new ArrayList<NodeEntry>();
 
-		int j = 0;
-		for (NodeEntry ne : cache)
+		for (int i = 0; i < cache.length && cache[i] != null; i++){
+			NodeEntry ne = cache[i];
 			if (ne.type == FRIEND)
-				friends[j++] = ne;
+				friends.add(ne);
+		}
 
-		return friends;
+		return friends.toArray(new NodeEntry[0]);
 	}
 
 	public void processEvent(Node node, int pid, Object event) {
@@ -271,7 +255,10 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 		System.arraycopy(NewscastED.tn, 0, peer.cache, 0, cache.length);
 
 		// set first element
+		cache[0] = new NodeEntry();
+		peer.cache[0] = new NodeEntry();
 		cache[0].ts = peer.cache[0].ts = CommonState.getIntTime();
+		cache[0].type = peer.cache[0].type = FRIEND;
 		cache[0].n = peerNode;
 		peer.cache[0].n = node;
 	}
@@ -294,6 +281,8 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 			}
 			i = 0;
 		}
+		
+		cache[i] = new NodeEntry();
 		cache[i].n = node;
 		cache[i].ts = CommonState.getIntTime();
 		cache[i].type = FRIEND;

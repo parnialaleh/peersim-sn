@@ -33,7 +33,11 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 		if (rnode == null)
 			return;
 		Message request = lpeer.prepareRequest(lnode, rnode);
+
 		if (request != null) {
+			
+			System.out.println("Request " + request);
+			
 			request.setPid(pid);
 			request.setRequest(true);
 			request.setSender(lnode);
@@ -50,8 +54,9 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 		if (msg.isRequest()) {
 			EpidemicMessage reply = (EpidemicMessage)lpeer.prepareResponse(lnode, msg.getSender(), msg);
 			if (reply != null) {
+				System.out.println("Reply " + reply);
 				reply.setPid(pid);
-				reply.setRequest(reply.isHash());
+				reply.setRequest(reply.isRequest());
 				reply.setSender(lnode);
 				Transport tr = (Transport) lnode.getProtocol(c.tid);
 				tr.send(lnode, msg.getSender(), reply, thisPid);
