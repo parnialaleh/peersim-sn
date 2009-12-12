@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import example.sn.NewsManager;
-import example.sn.NewscastED;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.epidemic.message.NewsStatusChange;
+import example.sn.newscast.NewscastED;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -66,12 +66,12 @@ public class AddNews implements Control
 		while (s.size() <= friendshipNo){
 			i = CommonState.r.nextInt(size);
 			if (!s.contains(i)){
-				idle = (IdleProtocol)Network.get(i).getProtocol(pidNewsManager);
-				newscast = (NewscastED)Network.get(i).getProtocol(pidIdle);
+				idle = (IdleProtocol)Network.get(i).getProtocol(pidIdle);
+				newscast = (NewscastED)Network.get(i).getProtocol(pidNewscast);
 
 				Node n = Network.get(CommonState.r.nextInt(size));
 				if (!idle.contains(n) && !newscast.contains(n)){				
-					newsManager = (NewsManager)Network.get(i).getProtocol(pidNewscast);
+					newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 					newsManager.addNews(new NewsFriendship(Network.get(i), n), Network.get(i));
 					s.add(i);
 				}

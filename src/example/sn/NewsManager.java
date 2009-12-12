@@ -13,6 +13,7 @@ import peersim.edsim.EDProtocol;
 
 import example.sn.epidemic.message.News;
 import example.sn.epidemic.message.NewsFriendship;
+import example.sn.newscast.NewscastED;
 
 /**
  * Class to manage all news.
@@ -47,6 +48,11 @@ public class NewsManager implements EDProtocol
 		return nm;
 	}
 	
+	public boolean contains(News n)
+	{
+		return news.contains(n);
+	}
+	
 
 	public void addNews(News news, Node n)
 	{
@@ -67,6 +73,17 @@ public class NewsManager implements EDProtocol
 		return list;
 	}
 	
+	public List<News> getOwnNews(Node lnode)
+	{
+		List<News> list = new ArrayList<News>();
+		
+		for (News n: news)
+			if (n.getNode().getID() == lnode.getID())
+				list.add(n);
+						
+		return list;
+	}
+	
 	public News getNews(int index)
 	{
 		return this.news.get(index);
@@ -74,6 +91,7 @@ public class NewsManager implements EDProtocol
 	
 	public boolean merge(List<News> messages)
 	{
+		System.out.println("Merge");
 		boolean addSomething = this.news.addAll(messages);
 		Collections.sort(this.news);
 		return addSomething;

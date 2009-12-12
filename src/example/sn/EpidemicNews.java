@@ -5,9 +5,9 @@ import peersim.core.Node;
 import peersim.extras.am.epidemic.EpidemicProtocol;
 import peersim.extras.am.epidemic.Message;
 import peersim.extras.am.epidemic.bcast.Infectable;
-import peersim.extras.am.epidemic.bcast.InfectionMessage;
 import example.sn.epidemic.message.EpidemicHashMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
+import example.sn.newscast.NewscastED;
 
 public class EpidemicNews implements EpidemicProtocol, Infectable
 {	
@@ -23,7 +23,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public EpidemicNews(String n)
 	{
-		this.infected = false;
+		this.infected = true;
 
 		this.pidNewsManger = Configuration.getPid(n + "." + PAR_NEWS_MANAGER);
 		this.pidNetworkManger = Configuration.getPid(n + "." + PAR_NETWORK_MANAGER);
@@ -36,38 +36,37 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 		try {
 			ev = (EpidemicNews)super.clone();
 		} catch (CloneNotSupportedException e) {}
-		ev.infected = false;
+		ev.infected = true;
 		return ev;	
 	}
 
 	public void merge(Node lnode, Node rnode, Message msg) {
-		//never terminate (?)
+		System.out.println("MMMERGE");
 		infected = infected || ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
 	}
 
 	public Message prepareRequest(Node lnode, Node rnode) {
 		if (!infected)
-			return new InfectionMessage(false);
+			return null;
 		
 		if (hash_message)
-			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode());
+			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode(), true);
 		
-		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode));
+		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode), true);
 	}
 
 	public Message prepareResponse(Node lnode, Node rnode, Message request) {
 		if (!infected)
 			return null;
 		
-		if (request instanceof EpidemicHashMessage)
-			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode());
+		if ((request instanceof EpidemicHashMessage) && ((EpidemicHashMessage)request).isRequest())
+			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode(), false);
 		
-		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode));
+		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode), (request instanceof EpidemicHashMessage));
 	}
 
 	public Node selectPeer(Node lnode)
 	{
-		//ask the peer to Newscast
 		return ((NewscastED)(lnode.getProtocol(pidNetworkManger))).getPeer();
 	}
 
