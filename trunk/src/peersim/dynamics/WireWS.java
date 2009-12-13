@@ -84,7 +84,6 @@ public WireWS(String prefix) {
 
 /** calls {@link GraphFactory#wireWS}.*/
 public void wire(Graph g) {
-
 	GraphFactory.wireWS(g,k,beta,CommonState.r);
 }
 

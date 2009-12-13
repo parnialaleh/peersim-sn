@@ -41,8 +41,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	}
 
 	public void merge(Node lnode, Node rnode, Message msg) {
-		System.out.println("MMMERGE");
-		infected = infected || ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
+		infected = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages()) || infected;
 	}
 
 	public Message prepareRequest(Node lnode, Node rnode) {
@@ -50,7 +49,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 			return null;
 		
 		if (hash_message)
-			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode(), true);
+			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode());
 		
 		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode), true);
 	}
@@ -59,8 +58,8 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 		if (!infected)
 			return null;
 		
-		if ((request instanceof EpidemicHashMessage) && ((EpidemicHashMessage)request).isRequest())
-			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode(), false);
+		if ((request instanceof EpidemicHashMessage) && ((EpidemicHashMessage)request).getStatus())
+			return new EpidemicHashMessage(false, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode());
 		
 		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode), (request instanceof EpidemicHashMessage));
 	}
