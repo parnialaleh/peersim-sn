@@ -1,12 +1,14 @@
 package example.sn.epidemic.message;
 
-public class EpidemicHashMessage extends EpidemicMessage
+import peersim.extras.am.epidemic.bcast.InfectionMessage;
+
+public class EpidemicHashMessage extends InfectionMessage
 {
 	private int hashcode = 0;
 
 
-	public EpidemicHashMessage(boolean status, int hashcode, boolean request) {
-		super(status, true, request);
+	public EpidemicHashMessage(boolean status, int hashcode) {
+		super(status);
 		this.hashcode = hashcode;
 	}
 	

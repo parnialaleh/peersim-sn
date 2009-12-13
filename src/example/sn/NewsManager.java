@@ -5,14 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import peersim.config.Configuration;
-import peersim.core.IdleProtocol;
 import peersim.core.Network;
 import peersim.core.Node;
-import peersim.dynamics.WireKOut;
 import peersim.edsim.EDProtocol;
 
 import example.sn.epidemic.message.News;
 import example.sn.epidemic.message.NewsFriendship;
+import example.sn.newscast.LinkableSN;
 import example.sn.newscast.NewscastED;
 
 /**
@@ -66,9 +65,8 @@ public class NewsManager implements EDProtocol
 		List<News> list = new ArrayList<News>();
 		
 		for (News n: news)
-			if (n.getNode().getID() == lnode.getID() || ((NewscastED)n.getNode().getProtocol(pidNetworkManger)).contains(n.getNode()) || ((IdleProtocol)n.getNode().getProtocol(pidNetworkManger)).contains(n.getNode()))
-				list.add(n);
-				
+			if (n.getNode().getID() == lnode.getID() || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()))
+				list.add(n);				
 		
 		return list;
 	}
@@ -91,8 +89,13 @@ public class NewsManager implements EDProtocol
 	
 	public boolean merge(List<News> messages)
 	{
-		System.out.println("Merge");
-		boolean addSomething = this.news.addAll(messages);
+		boolean addSomething = false;
+		for (News n : messages)
+			if (!news.contains(n)){
+				news.add(n);
+				addSomething = true;
+			}
+
 		Collections.sort(this.news);
 		return addSomething;
 	}

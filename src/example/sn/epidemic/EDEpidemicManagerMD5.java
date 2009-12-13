@@ -1,11 +1,13 @@
 package example.sn.epidemic;
 
-import example.sn.epidemic.message.EpidemicMessage;
+import example.sn.epidemic.message.EpidemicHashMessage;
+import example.sn.epidemic.message.EpidemicWholeMessages;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.extras.am.epidemic.EDEpidemicManager;
 import peersim.extras.am.epidemic.EpidemicProtocol;
 import peersim.extras.am.epidemic.Message;
+import peersim.extras.am.epidemic.bcast.InfectionMessage;
 import peersim.transport.Transport;
 
 public class EDEpidemicManagerMD5 extends EDEpidemicManager
@@ -35,9 +37,6 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 		Message request = lpeer.prepareRequest(lnode, rnode);
 
 		if (request != null) {
-			
-			System.out.println("Request " + request);
-			
 			request.setPid(pid);
 			request.setRequest(true);
 			request.setSender(lnode);
@@ -48,21 +47,21 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 
 	private void passiveThread(Node lnode, Message message, int thisPid)
 	{
-		EpidemicMessage msg = (EpidemicMessage)message;
+		InfectionMessage msg = (InfectionMessage)message;
 		int pid = msg.getPid();
 		EpidemicProtocol lpeer = (EpidemicProtocol) lnode.getProtocol(pid);
 		if (msg.isRequest()) {
-			EpidemicMessage reply = (EpidemicMessage)lpeer.prepareResponse(lnode, msg.getSender(), msg);
+			InfectionMessage reply = (InfectionMessage)lpeer.prepareResponse(lnode, msg.getSender(), msg);
 			if (reply != null) {
-				System.out.println("Reply " + reply);
 				reply.setPid(pid);
-				reply.setRequest(reply.isRequest());
+				boolean isRequest = reply instanceof EpidemicHashMessage || ((reply instanceof EpidemicWholeMessages) && ((EpidemicWholeMessages)reply).isFirst());
+				reply.setRequest(isRequest);
 				reply.setSender(lnode);
 				Transport tr = (Transport) lnode.getProtocol(c.tid);
 				tr.send(lnode, msg.getSender(), reply, thisPid);
 			}
 		}
-		if (!msg.isHash())
+		if (!(msg instanceof EpidemicHashMessage))
 			lpeer.merge(lnode, msg.getSender(), msg);
 	}
 	

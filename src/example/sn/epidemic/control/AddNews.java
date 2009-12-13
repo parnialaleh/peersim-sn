@@ -16,42 +16,42 @@ import peersim.core.Node;
 
 public class AddNews implements Control
 {
-	/*private static final String PAR_PROB_FRIENDSHIP = "p.friendship";
-	private static final String PAR_PROB_STATUS_CHANGE = "p.status_change";*/
 	private static final String PAR_PROT_NEWS_MANAGER = "protocol.newsManager";
 	private static final String PAR_PROT_IDLE = "protocol.idle";
 	private static final String PAR_PROT_NEWSCAST = "protocol.newscast";
 	private static final String PAR_FRIENDSHIP = "friendshipNo";
 	private static final String PAR_STATUS_CHANGE = "statusChangeNo";
+	private static final String PAR_END_PROTOCOL = "endtime";
 
-	/*private final double pFriendship;
-	private final double pStatusChange;*/
 	private final int pidNewsManager;
 	private final int pidIdle;
 	private final int pidNewscast;
 	private final int friendshipNo;
 	private final int statusChangeNo;
+	private final long endTime;
 
 	public AddNews(String n)
 	{
-		/*this.pFriendship = Configuration.getDouble(n + "." + PAR_PROB_FRIENDSHIP);
-		this.pStatusChange = Configuration.getDouble(n + "." + PAR_PROB_STATUS_CHANGE);*/
 		this.pidNewsManager = Configuration.getPid(n + "." + PAR_PROT_NEWS_MANAGER);
 		this.pidIdle = Configuration.getPid(n + "." + PAR_PROT_IDLE);
 		this.pidNewscast = Configuration.getPid(n + "." + PAR_PROT_NEWSCAST);
 		this.friendshipNo = Configuration.getInt(n + "." + PAR_FRIENDSHIP);
 		this.statusChangeNo = Configuration.getInt(n + "." + PAR_STATUS_CHANGE);
+		this.endTime = Configuration.getLong(n + "." + PAR_END_PROTOCOL, Long.MAX_VALUE);
 	}
 
 
 	public boolean execute()
 	{
+		if (CommonState.getTime() >= endTime)
+			return false;
+		
 		final int size = Network.getCapacity();
 		Set<Integer> s = new HashSet<Integer>();
 
 		int i;
 		NewsManager newsManager;
-		while (s.size() <= statusChangeNo){
+		while (s.size() < statusChangeNo){
 			i = CommonState.r.nextInt(size);
 			if (!s.contains(i)){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
@@ -63,7 +63,7 @@ public class AddNews implements Control
 		s = new HashSet<Integer>();
 		IdleProtocol idle;
 		NewscastED newscast;
-		while (s.size() <= friendshipNo){
+		while (s.size() < friendshipNo){
 			i = CommonState.r.nextInt(size);
 			if (!s.contains(i)){
 				idle = (IdleProtocol)Network.get(i).getProtocol(pidIdle);

@@ -1,23 +1,17 @@
 package example.sn.newscast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.IdleProtocol;
-import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 
-public class NewscastED implements EDProtocol, CDProtocol, Linkable 
+public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 {
-
-	private static final int FRIEND = 1;
-	private static final int FRIEND_FRIEND = 2;
 
 	/**
 	 * Initial cache size.
@@ -166,7 +160,7 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 
 			if (first) {
 				if (cache[i1].n != peerNode && !NewscastED.contains(i, cache[i1].n, NewscastED.tn)) {
-					NewscastED.tn[i] = cache[i1];
+					NewscastED.tn[i] = cache[i1];					
 					i++;
 				}
 				i1++;
@@ -248,11 +242,14 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 		}
 
 		NewscastED peer = (NewscastED) (peerNode.getProtocol(protocolID));
+		
 		merge(node, peer, peerNode);
-
-		// set new cache in this and peer
+		// set new cache in this node
 		System.arraycopy(NewscastED.tn, 0, cache, 0, cache.length);
-		System.arraycopy(NewscastED.tn, 0, peer.cache, 0, cache.length);
+		
+		peer.merge(peerNode, this, node);
+		// set new cache in peer node
+		System.arraycopy(NewscastED.tn, 0, peer.cache, 0, peer.cache.length);
 
 		// set first element
 		cache[0] = new NodeEntry();
@@ -292,7 +289,7 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 	public boolean contains(Node node)
 	{
 		for (int i = 0; i < cache.length; i++) {
-			if (cache[i] == node)
+			if (cache[i].n == node)
 				return true;
 		}
 		return false;
@@ -330,6 +327,15 @@ public class NewscastED implements EDProtocol, CDProtocol, Linkable
 			sb.append(" (" + cache[i].n.getIndex() + "," + cache[i].ts + "," + fType + ")");
 		}
 		return sb.toString();
+	}
+
+	public boolean containsAsFriend(Node n)
+	{
+		for (int i = 0; i < cache.length && cache[i] != null; i++) {
+			if ((cache[i].n == n) && (cache[i].type == FRIEND))
+				return true;
+		}
+		return false;
 	}
 
 
