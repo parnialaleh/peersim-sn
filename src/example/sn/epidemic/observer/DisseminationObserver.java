@@ -58,8 +58,6 @@ public class DisseminationObserver implements Control
 				for (NodeEntry ne : friends)
 					if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw))
 						know++;
-
-				System.out.println(friends.length);
 				stats.add((double)know / (double)friends.length);
 			}
 		}

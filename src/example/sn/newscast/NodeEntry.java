@@ -2,7 +2,7 @@ package example.sn.newscast;
 
 import peersim.core.Node;
 
-public class NodeEntry implements Comparable<NodeEntry>
+public class NodeEntry implements Comparable<NodeEntry>, Cloneable
 {
 	public Node n = null;
 	public int ts = -1;
@@ -25,5 +25,15 @@ public class NodeEntry implements Comparable<NodeEntry>
 			return 1;
 
 		return 0;
+	}
+	
+	@Override
+	protected Object clone(){
+		NodeEntry ne = null;
+		try { ne = (NodeEntry) super.clone(); }
+		catch( CloneNotSupportedException e ) {} // never happens
+		ne.ts = this.ts;
+		ne.type = this.type;
+		return ne;
 	}
 }
