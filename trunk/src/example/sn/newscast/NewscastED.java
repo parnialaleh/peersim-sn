@@ -141,24 +141,29 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		NodeEntry peerFriends[] = peer.getFriends();
 
 		//merge only with the peer friends that I already know
-		HashSet<NodeEntry> tmp = new HashSet<NodeEntry>(Arrays.asList(peerFriends));
+		//HashSet<NodeEntry> tmp = new HashSet<NodeEntry>(Arrays.asList(peerFriends));
 
-		int k = 0;
-		for (k=cache.length-1; cache[k] == null && k > 0; k--);
-		NodeEntry lcache[] = new NodeEntry[++k];
-		System.arraycopy(cache, 0, lcache, 0, k);
-		tmp.addAll(Arrays.asList(lcache));
+		//int k = 0;
+//		for (k=cache.length-1; cache[k] == null && k > 0; k--);
+//		NodeEntry lcache[] = new NodeEntry[++k];
+//		System.arraycopy(cache, 0, lcache, 0, k);
+//		tmp.addAll(Arrays.asList(lcache));
+		
+		int finalSize = cache.length;
+		for (NodeEntry ne : peerFriends)
+			if (!contains(ne.n))
+				finalSize++;
 
-		if (tmp.size() >= cache.length) {
-			NodeEntry[] temp = new NodeEntry[tmp.size()];
+		if (finalSize >= cache.length) {
+			NodeEntry[] temp = new NodeEntry[finalSize];
 			System.arraycopy(cache, 0, temp, 0, cache.length);
 			cache = temp;
 		}
-		if (tmp.size() >= peer.cache.length) {
-			NodeEntry[] temp = new NodeEntry[tmp.size()];
-			System.arraycopy(peer.cache, 0, temp, 0, peer.cache.length);
-			peer.cache = temp;
-		}
+//		if (finalSize >= peer.cache.length) {
+//			NodeEntry[] temp = new NodeEntry[finalSize];
+//			System.arraycopy(peer.cache, 0, temp, 0, peer.cache.length);
+//			peer.cache = temp;
+//		}
 		
 
 		final int d1 = degree();
@@ -175,14 +180,14 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 			}
 
 			if (first) {
-				if (cache[i1].n != peerNode && !NewscastED.contains(i, cache[i1].n, tn)) {
+				if (cache[i1].n.getID() != peerNode.getID() && !NewscastED.contains(1, i, cache[i1].n, tn)) {
 					tn[i] = (NodeEntry)cache[i1].clone();
 					i++;
 				}
 				i1++;
 			} else {
-				if (peerFriends[i2].n != thisNode
-						&& !NewscastED.contains(i, peerFriends[i2].n, tn)) {
+				if (peerFriends[i2].n.getID() != thisNode.getID()
+						&& !NewscastED.contains(1, i, peerFriends[i2].n, tn)) {
 					tn[i] = (NodeEntry)peerFriends[i2].clone();
 					//if current node has peer.cache[i2].n in its cache then it is a friend otherwise a friend of a friend
 					//tn[i].type = NewscastED.containsAsFriend(cache.length, peerFriends[i2].n, cache)? FRIEND : FRIEND_FRIEND;
@@ -199,15 +204,15 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 			// only one of the for cycles will be entered
 
 			for (; i1 < d1 && i < cache.length; ++i1) {
-				if (cache[i1].n != peerNode && !NewscastED.contains(i, cache[i1].n, tn)) {
+				if (cache[i1].n.getID() != peerNode.getID() && !NewscastED.contains(1, i, cache[i1].n, tn)) {
 					tn[i] = (NodeEntry)cache[i1].clone();
 					i++;
 				}
 			}
 
 			for (; i2 < d2 && i < cache.length; ++i2) {
-				if (peerFriends[i2].n != thisNode
-						&& !NewscastED.contains(i, peerFriends[i2].n, tn)) {
+				if (peerFriends[i2].n.getID() != thisNode.getID()
+						&& !NewscastED.contains(1, i, peerFriends[i2].n, tn)) {
 					tn[i] = (NodeEntry)peerFriends[i2].clone();
 //					tn[i].type = NewscastED.containsAsFriend(cache.length, peerFriends[i2].n, cache)? FRIEND : FRIEND_FRIEND;
 					i++;
@@ -224,11 +229,12 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		}
 	}
 
-	private static boolean contains(int size, Node peer, NodeEntry[] list)
+	private static boolean contains(int start, int size, Node peer, NodeEntry[] list)
 	{
-		for (int i = 0; i < size && list[i] != null; i++) {
-			if (list[i].n == peer)
+		for (int i = start; i < size; i++) {
+			if (list[i].n.getID() == peer.getID()){
 				return true;
+			}
 		}
 		return false;
 	}
@@ -247,7 +253,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	}
 
 	public void processEvent(Node node, int pid, Object event) {
-		nextCycle(node, pid);		
+//		nextCycle(node, pid);		
 	}
 
 	public void nextCycle(Node node, int protocolID) 
@@ -259,6 +265,9 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		}
 
 		NewscastED peer = (NewscastED) (peerNode.getProtocol(protocolID));
+		int type = containsAsFriend(peerNode)? FRIEND : FRIEND_FRIEND;
+		
+		int tmpc = degree();
 
 //		if (node.getID() == 180){
 //			System.out.println(node.getID() + "X" + peerNode.getID());
@@ -267,6 +276,19 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 //		}
 
 		merge(node, peer, peerNode);
+		NodeEntry[] currentNodeCache = new NodeEntry[NewscastED.tn.length];
+		for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++){
+//			System.out.print(contains(NewscastED.tn[k].n) + "," + NewscastED.tn[k].n.getID() + " ");
+			currentNodeCache[k] = (NodeEntry)NewscastED.tn[k].clone();
+			currentNodeCache[k].type = containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
+		}
+		
+		peer.merge(peerNode, this, node);
+		NodeEntry[] peerNodeCache = new NodeEntry[NewscastED.tn.length];
+		for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++){
+			peerNodeCache[k] = (NodeEntry)NewscastED.tn[k].clone();
+			peerNodeCache[k].type = peer.containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
+		}
 		
 //		if (node.getID() == 180){
 //			System.out.println(node.getID() + "X" + peerNode.getID());
@@ -274,6 +296,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 //			System.out.println(peer);
 //			
 //			String fType = null;
+//			System.out.println("ZXXXX");
 //			for (int i = 1; i < NewscastED.tn.length && NewscastED.tn[i] != null; ++i) {
 //				fType = (NewscastED.tn[i].type == FRIEND)? "F": "FF";
 //				System.out.print(" (" + NewscastED.tn[i].n.getIndex() + "," + NewscastED.tn[i].ts + "," + fType + ")");
@@ -282,29 +305,16 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 //			System.out.println();
 //		}
 		
-		NodeEntry[] currentNodeCache = new NodeEntry[NewscastED.tn.length];
-		NodeEntry[] peerNodeCache = new NodeEntry[NewscastED.tn.length];
-
-		for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++){
-//			System.out.print(contains(NewscastED.tn[k].n) + "," + NewscastED.tn[k].n.getID() + " ");
-			currentNodeCache[k] = (NodeEntry)NewscastED.tn[k].clone();
-			peerNodeCache[k] = (NodeEntry)NewscastED.tn[k].clone();
-			
-			currentNodeCache[k].type = containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
-			peerNodeCache[k].type = peer.containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
-		}
-		
 		cache = new NodeEntry[currentNodeCache.length];
 		peer.cache = new NodeEntry[peerNodeCache.length];
 		System.arraycopy(currentNodeCache, 0, cache, 0, cache.length);
 		System.arraycopy(peerNodeCache, 0, peer.cache, 0, peer.cache.length);
-		//System.arraycopy(NewscastED.tn, 0, peer.cache, 0, peer.cache.length);
 
 		// set first element
 		cache[0] = new NodeEntry();
 		peer.cache[0] = new NodeEntry();
 		cache[0].ts = peer.cache[0].ts = CommonState.getIntTime();
-		cache[0].type = peer.cache[0].type = FRIEND;
+		cache[0].type = peer.cache[0].type = type;
 		cache[0].n = peerNode;
 		peer.cache[0].n = node;
 
@@ -313,6 +323,11 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 //			System.out.println(this);
 //			System.out.println(peer);
 //		}
+		
+//		if (cache.length > 200 )
+//			System.out.println(node.getID() + " " + cache.length);
+		
+//		System.out.println(this);
 	}
 
 	public boolean addNeighbor(Node node) 
@@ -347,7 +362,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	public boolean contains(Node node)
 	{
 		for (int i = 0; i < cache.length && cache[i] != null; i++) {
-			if (cache[i].n == node)
+			if (cache[i].n.getID() == node.getID())
 				return true;
 		}
 		return false;
@@ -390,7 +405,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	public boolean containsAsFriend(Node n)
 	{
 		for (int i = 0; i < cache.length && cache[i] != null; i++) {
-			if ((cache[i].n == n) && (cache[i].type == FRIEND))
+			if ((cache[i].n.getID() == n.getID()) && (cache[i].type == FRIEND))
 				return true;
 		}
 		return false;

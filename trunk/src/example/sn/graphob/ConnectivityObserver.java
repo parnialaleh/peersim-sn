@@ -9,6 +9,7 @@ import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
+import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.util.IncrementalStats;
@@ -248,6 +249,16 @@ public class ConnectivityObserver implements Control {
 
 		// stampa risultato visita
 		System.out.println(CommonState.getTime() + " " + name + ": " + is);
+		
+		IncrementalStats isCache = new IncrementalStats();
+		
+		Node n;
+		for (int i = 0; i < Network.size(); i++){
+			n = Network.get(i);
+//			if (n.isUp())
+				isCache.add(((Linkable)n.getProtocol(pid)).degree());
+		}
+		System.out.println(CommonState.getTime() + " " + name + "Cache: " + isCache);
 
 		return false;
 	}
