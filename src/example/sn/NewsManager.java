@@ -65,7 +65,10 @@ public class NewsManager implements EDProtocol
 		List<News> list = new ArrayList<News>();
 		
 		for (News n: news)
-			if (n.getNode().getID() == lnode.getID() || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()))
+			//if (n.getNode().getID() == lnode.getID() || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()))
+			
+			//mine news or news of my friends
+			if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()))// || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
 				list.add(n);				
 		
 		return list;
@@ -97,6 +100,7 @@ public class NewsManager implements EDProtocol
 			}
 
 		Collections.sort(this.news);
+//		System.err.println("Merge " + addSomething);
 		return addSomething;
 	}
 

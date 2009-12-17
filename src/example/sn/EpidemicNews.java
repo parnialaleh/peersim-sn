@@ -7,7 +7,7 @@ import peersim.extras.am.epidemic.Message;
 import peersim.extras.am.epidemic.bcast.Infectable;
 import example.sn.epidemic.message.EpidemicHashMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
-import example.sn.newscast.NewscastED;
+import example.sn.newscast.LinkableSN;
 
 public class EpidemicNews implements EpidemicProtocol, Infectable
 {	
@@ -66,7 +66,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public Node selectPeer(Node lnode)
 	{
-		return ((NewscastED)(lnode.getProtocol(pidNetworkManger))).getPeer();
+		return ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer();
 	}
 
 	public boolean isInfected()

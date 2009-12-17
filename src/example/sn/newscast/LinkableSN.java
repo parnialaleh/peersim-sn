@@ -15,5 +15,7 @@ public interface LinkableSN extends Linkable
 	 * @return true if n is found and is a friend, false otherwise
 	 */
 	public boolean containsAsFriend(Node n);
+	
+	public Node getFriendPeer();
 
 }
