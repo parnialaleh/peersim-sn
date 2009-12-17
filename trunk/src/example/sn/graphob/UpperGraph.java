@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 public class UpperGraph
 {
-	private ArrayList<ArrayList> graph = null;
-	private ArrayList<ArrayList> graphReverse = null;
+	private ArrayList<ArrayList<Integer>> graph = null;
+	private ArrayList<ArrayList<Integer>> graphReverse = null;
 
 	public UpperGraph(int dim)
 	{
-		graph = new ArrayList<ArrayList>(dim);
-		graphReverse = new ArrayList<ArrayList>(dim);
+		graph = new ArrayList<ArrayList<Integer>>(dim);
+		graphReverse = new ArrayList<ArrayList<Integer>>(dim);
 		for (int i = 0; i < dim; ++i){
 			graph.add(new ArrayList<Integer>());
 			graphReverse.add(new ArrayList<Integer>());

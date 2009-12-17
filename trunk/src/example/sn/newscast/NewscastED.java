@@ -1,16 +1,12 @@
 package example.sn.newscast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-
-import example.sn.node.SNNode;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
-import peersim.core.IdleProtocol;
+import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 
@@ -49,6 +45,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	{
 		final int cachesize = Configuration.getInt(n + "." + PAR_CACHE);
 		ff_communication = Configuration.getBoolean(n + "." + PAR_COMMUNICATE, true);
+		
 		idle_protocol = Configuration.getPid(n + "." + PAR_IDLE_PROTOCOL);
 		if (NewscastED.tn == null || NewscastED.tn.length < cachesize) {
 			NewscastED.tn = new NodeEntry[cachesize];
@@ -63,12 +60,10 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		catch( CloneNotSupportedException e ) {} // never happens
 		sn.cache = new NodeEntry[cache.length];
 
-		//TODO needed?
-		//System.arraycopy(cache, 0, sn.cache, 0, cache.length);
 		return sn;
 	}
-
-	public Node getPeer()
+	
+	private Node getPeer(boolean ff_communication)
 	{
 		final int d = degree();
 		if (d == 0)
@@ -77,28 +72,54 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		Node result = cache[index].n;
 
 		//		System.out.println(result.getID() + " " + cache[index].type);
-		if ((result.isUp()) && ((cache[index].type == FRIEND) || ff_communication))
+		//if ((result.isUp()) && ((cache[index].type == FRIEND) || ff_communication))
+		if ((result.isUp()) && (cache[index].type == FRIEND))
 			return result;
 
 		// proceed towards older entries
 		for (int i = index + 1; i < d; ++i){
 			//			System.out.println(cache[i].n.getID() + " " + cache[i].n.isUp() + " " + cache[i].type);
-			if (cache[i].n.isUp() && ((cache[i].type == FRIEND) || ff_communication))
+//			if (cache[i].n.isUp() && ((cache[i].type == FRIEND) || ff_communication))
+			if((cache[i].n.isUp()) && (cache[i].type == FRIEND))
 				return cache[i].n;
 		}
 
 		// proceed towards younger entries
 		for (int i = index - 1; i >= 0; --i)
-			if (cache[i].n.isUp() && ((cache[i].type == FRIEND) || ff_communication))
+			if ((cache[i].n.isUp()) && (cache[i].type == FRIEND))
 				return cache[i].n;
+		
+		if (ff_communication){
+			if ((result.isUp()) && (cache[index].type == FRIEND_FRIEND))
+				return result;
+
+			for (int i = index + 1; i < d; ++i){
+				if((cache[i].n.isUp()) && (cache[i].type == FRIEND_FRIEND))
+					return cache[i].n;
+			}
+			
+			for (int i = index - 1; i >= 0; --i)
+				if ((cache[i].n.isUp()) && (cache[i].type == FRIEND_FRIEND))
+					return cache[i].n;
+		}
 
 		// no accessible peer
 		return null;
 	}
 
+	public Node getPeer()
+	{
+		return getPeer(ff_communication);
+	}
+	
+	public Node getFriendPeer()
+	{
+		return getPeer(false);
+	}
+
 	private Node getPeer(Node node)
 	{
-		IdleProtocol idle = (IdleProtocol)node.getProtocol(idle_protocol);
+		Linkable idle = (Linkable)node.getProtocol(idle_protocol);
 
 		final int d = idle.degree();
 		final int d1 = degree();
@@ -267,8 +288,6 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		NewscastED peer = (NewscastED) (peerNode.getProtocol(protocolID));
 		int type = containsAsFriend(peerNode)? FRIEND : FRIEND_FRIEND;
 		
-		int tmpc = degree();
-
 //		if (node.getID() == 180){
 //			System.out.println(node.getID() + "X" + peerNode.getID());
 //			System.out.println(this);

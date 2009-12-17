@@ -55,7 +55,7 @@ public class AddNews implements Control
 			i = CommonState.r.nextInt(size);
 			if (!s.contains(i)){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
-				newsManager.addNews(new NewsStatusChange(Network.get(i)), null);
+				newsManager.addNews(new NewsStatusChange(Network.get(i)), Network.get(i));
 				s.add(i);
 			}
 		}
