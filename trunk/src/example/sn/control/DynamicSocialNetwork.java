@@ -49,7 +49,7 @@ public class DynamicSocialNetwork implements Control
 		while (s.size() < n){
 			i = CommonState.r.nextInt(size);
 			if (!s.contains(i)){
-				System.out.print(" " + onLineNodes.get(i).getID());
+//				System.out.print(" " + onLineNodes.get(i).getID());
 				((SNNode)onLineNodes.get(i)).setOnline(false);
 				s.add(i);
 			}
