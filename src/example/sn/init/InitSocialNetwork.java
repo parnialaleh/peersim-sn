@@ -1,16 +1,14 @@
 package example.sn.init;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import example.sn.node.SNNode;
 
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -22,71 +20,98 @@ import peersim.util.IncrementalStats;
 
 public class InitSocialNetwork implements Control
 {
-	class HowToHandler extends DefaultHandler {
-		boolean title = false;
-		boolean url   = false;
-		public void startElement(String nsURI, String strippedName,
-				String tagName, Attributes attributes)
-		throws SAXException {
-			if (tagName.equalsIgnoreCase("title"))
-				title = true;
-			if (tagName.equalsIgnoreCase("url"))
-				url = true;
-		}
-
-		public void characters(char[] ch, int start, int length) {
-			if (title) {
-				System.out.println("Title: " + new String(ch, start, length));
-				title = false;
-			}
-			else if (url) {
-				System.out.println("Url: " + new String(ch, start,length));
-				url = false;
-			}
-		}
-	}
-
-
-
-
 	private static final String PAR_LINKABLE = "linkable";
 	private static final String PAR_FILE = "file";
-//	private static final String PAR_XML = "xml";
+		private static final String PAR_XML = "xml";
 
 	private final int pid;
 	private final String fileName;
-//	private final boolean isXml;
+	private final boolean isXml;
 
 	public InitSocialNetwork(String n)
 	{
 		this.pid = Configuration.getPid(n + "." + PAR_LINKABLE);
 		this.fileName = Configuration.getString(n + "." + PAR_FILE);
-//		this.isXml = Configuration.getBoolean(n + " " + PAR_XML, false);
+		this.isXml = Configuration.contains(n + "." + PAR_XML);
 	}
 
-	public boolean execute()
+	private boolean parseXML()
 	{
 		List<String> nodes = new ArrayList<String>();
-		try{
-			BufferedReader d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(fileName))))));
-			String line = null;
-			while ((line = d.readLine()) != null){
-				if (line.contains("<node")){
-					nodes.add(line.split("\"")[1].split("n")[1]);
+		try {
+			DOMParser parser = new DOMParser();
+			parser.parse(fileName);
+			Document doc = parser.getDocument();
+
+			NodeList nodelist = doc.getElementsByTagName("node");
+			
+			System.err.println("Nodes " + nodelist.getLength());
+			
+			for (int i = 0; i < nodelist.getLength(); i++){
+				org.w3c.dom.Node n = nodelist.item(i);
+				if (n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE ){
+					Element e = (Element)n;
+					nodes.add(e.getAttribute("id").split("n")[1]);
 				}
-				if (line.contains("<edge")){
-					String[] fstElmnt = line.split("\"");
-					String src = fstElmnt[3].split("n")[1];
-					String dest = fstElmnt[5].split("n")[1];
+			}
+			
+			int newsize = nodes.size();
+			int size = Network.size();
+			for (int i = newsize; i < size; i++)
+				((SNNode)Network.remove(CommonState.r.nextInt(Network.size()))).setOnline(false);
+		
+			for (int i = size; i < newsize; i++)
+				Network.add((Node)Network.prototype.clone());
+		
+			System.err.println(Network.size() + " " + nodes.size());
+
+			nodelist = doc.getElementsByTagName("edge");
+			for (int i = 0; i < nodelist.getLength(); i++){
+				org.w3c.dom.Node n = nodelist.item(i);
+				if (n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE){
+					Element e = (Element)n;
+					String src = e.getAttribute("source").split("n")[1];
+					String dest = e.getAttribute("target").split("n")[1];
 
 					((Linkable)Network.get(nodes.indexOf(src)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(dest)));
 					((Linkable)Network.get(nodes.indexOf(dest)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(src)));
 				}
 			}
 
-		} catch (Exception e){
-			e.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
 		}
+		
+		return true;
+	}
+	
+	public boolean execute()
+	{
+
+		if (isXml)
+			parseXML();
+
+//		try{
+//			BufferedReader d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(fileName))))));
+//			String line = null;
+//			while ((line = d.readLine()) != null){
+//				if (line.contains("<node")){
+//					nodes.add(line.split("\"")[1].split("n")[1]);
+//				}
+//				if (line.contains("<edge")){
+//					String[] fstElmnt = line.split("\"");
+//					String src = fstElmnt[3].split("n")[1];
+//					String dest = fstElmnt[5].split("n")[1];
+//
+//					((Linkable)Network.get(nodes.indexOf(src)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(dest)));
+//					((Linkable)Network.get(nodes.indexOf(dest)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(src)));
+//				}
+//			}
+//
+//		} catch (Exception e){
+//			e.printStackTrace();
+//		}
 
 		IncrementalStats isCache = new IncrementalStats();
 		Node n;

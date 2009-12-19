@@ -5,5 +5,10 @@
 	<classpathentry kind="lib" path="lib/colt-1.2.0.jar"/>
 	<classpathentry kind="lib" path="lib/djep-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/jep-2.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/serializer.jar"/>
+	<classpathentry kind="lib" path="lib/xalan.jar"/>
+	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/xsltc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -46,14 +46,14 @@ public class AddNews implements Control
 		if (CommonState.getTime() >= endTime)
 			return false;
 		
-		final int size = Network.getCapacity();
+		final int size = Network.size();
 		Set<Integer> s = new HashSet<Integer>();
 
 		int i;
 		NewsManager newsManager;
 		while (s.size() < statusChangeNo){
 			i = CommonState.r.nextInt(size);
-			if (!s.contains(i)){
+			if (!s.contains(i) && Network.get(i).isUp()){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				newsManager.addNews(new NewsStatusChange(Network.get(i)), Network.get(i));
 				s.add(i);
