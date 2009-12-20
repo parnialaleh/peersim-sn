@@ -20,6 +20,9 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 	
 	public void processEvent(Node lnode, int thisPid, Object event)
 	{
+//		if (lnode.getID() == 357)
+//			System.out.println(lnode.getID() + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		
 		if (event instanceof Integer) {
 			activeThread(lnode, (Integer) event, thisPid);
 		} else {
@@ -32,6 +35,7 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 		EDSimulator.add(c.period, pid, lnode, thisPid);
 		EpidemicProtocol lpeer = (EpidemicProtocol) lnode.getProtocol(pid);
 		Node rnode = lpeer.selectPeer(lnode);
+		
 		if (rnode == null)
 			return;
 		Message request = lpeer.prepareRequest(lnode, rnode);

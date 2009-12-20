@@ -12,7 +12,7 @@ import peersim.edsim.EDProtocol;
 import example.sn.epidemic.message.News;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.newscast.LinkableSN;
-import example.sn.newscast.NewscastED;
+import example.sn.newscast.NewscastSN;
 
 /**
  * Class to manage all news.
@@ -57,7 +57,7 @@ public class NewsManager implements EDProtocol
 	{
 		this.news.add(news);
 		if (news instanceof NewsFriendship)
-			((NewscastED)n.getProtocol(pidNetworkManger)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
+			((NewscastSN)n.getProtocol(pidNetworkManger)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
 	}
 	
 	public List<News> getNews(Node lnode, Node rnode)

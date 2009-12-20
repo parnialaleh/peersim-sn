@@ -41,7 +41,10 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	}
 
 	public void merge(Node lnode, Node rnode, Message msg) {
-		infected = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages()) || infected;
+		boolean res = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
+//		if (res)
+//			System.err.println("MERGE " + lnode.getID() + " " + rnode.getID());
+		infected =  res || infected;
 	}
 
 	public Message prepareRequest(Node lnode, Node rnode) {

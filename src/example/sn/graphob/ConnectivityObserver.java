@@ -43,6 +43,8 @@ public class ConnectivityObserver implements Control {
 	private int ft[];
 
 	private int time = 0;
+	
+	private int networksize = 0;
 
 	public ConnectivityObserver(String name) {
 		this.name = name;
@@ -185,6 +187,8 @@ public class ConnectivityObserver implements Control {
 				node.add((SNNode)Network.get(i));
 			}
 		}
+		
+		networksize = nodes;
 
 		ug = new UpperGraph(nodes);
 		n = new int[nodes];
@@ -248,17 +252,17 @@ public class ConnectivityObserver implements Control {
 		treeVisit(is);
 
 		// stampa risultato visita
-		System.out.println(CommonState.getTime() + " " + name + ": " + is);
+		System.out.println(CommonState.getTime() + " " + name + ": " + is + " " + networksize);
 		
-		IncrementalStats isCache = new IncrementalStats();
-		
-		Node n;
-		for (int i = 0; i < Network.size(); i++){
-			n = Network.get(i);
+//		IncrementalStats isCache = new IncrementalStats();
+//		
+//		Node n;
+//		for (int i = 0; i < Network.size(); i++){
+//			n = Network.get(i);
 //			if (n.isUp())
-				isCache.add(((Linkable)n.getProtocol(pid)).degree());
-		}
-		System.out.println(CommonState.getTime() + " " + name + "Cache: " + isCache);
+//				isCache.add(((Linkable)n.getProtocol(pid)).degree());
+//		}
+//		System.out.println(CommonState.getTime() + " " + name + "Cache: " + isCache);
 
 		return false;
 	}
