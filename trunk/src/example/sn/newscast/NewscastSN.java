@@ -1,7 +1,6 @@
 package example.sn.newscast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import peersim.cdsim.CDProtocol;
@@ -10,9 +9,8 @@ import peersim.core.CommonState;
 import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
-import peersim.transport.Transport;
 
-public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
+public class NewscastSN implements EDProtocol, CDProtocol, LinkableSN
 {
 
 	/**
@@ -34,9 +32,6 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	 */
 	private static final String PAR_IDLE_PROTOCOL = "idle_protocol";
 
-	private static final String PAR_TRANSPORT = "transport";
-	private static final String PAR_PERIOD = "period";
-
 	private final boolean ff_communication;
 	private final int idle_protocol;
 
@@ -46,46 +41,28 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	/** Neighbors currently in the cache */
 	private NodeEntry[] cache;
 
-	protected class CommonData
-	{
-		/** Transport protocol identifier */
-		public int tid;
-
-		/** Length of a cycle in the protocol */
-		public int period;
-
-	}
-
-	private CommonData c = null;
-
-	public NewscastED(String n)
+	public NewscastSN(String n)
 	{
 		final int cachesize = Configuration.getInt(n + "." + PAR_CACHE);
 		ff_communication = Configuration.getBoolean(n + "." + PAR_COMMUNICATE, true);
-
+		
 		idle_protocol = Configuration.getPid(n + "." + PAR_IDLE_PROTOCOL);
-		if (NewscastED.tn == null || NewscastED.tn.length < cachesize) {
-			NewscastED.tn = new NodeEntry[cachesize];
+		if (NewscastSN.tn == null || NewscastSN.tn.length < cachesize) {
+			NewscastSN.tn = new NodeEntry[cachesize];
 		}
 		cache = new NodeEntry[cachesize];
-
-		c = new CommonData();
-
-		// Read other parameters
-		c.tid = Configuration.getPid(n + "." + PAR_TRANSPORT);
-		c.period = Configuration.getInt(n + "." + PAR_PERIOD);
 	}
 
 	public Object clone()
 	{
-		NewscastED sn = null;
-		try { sn = (NewscastED) super.clone(); }
+		NewscastSN sn = null;
+		try { sn = (NewscastSN) super.clone(); }
 		catch( CloneNotSupportedException e ) {} // never happens
 		sn.cache = new NodeEntry[cache.length];
 
 		return sn;
 	}
-
+	
 	private Node getPeer(boolean ff_communication)
 	{
 		final int d = degree();
@@ -102,7 +79,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		// proceed towards older entries
 		for (int i = index + 1; i < d; ++i){
 			//			System.out.println(cache[i].n.getID() + " " + cache[i].n.isUp() + " " + cache[i].type);
-			//				if (cache[i].n.isUp() && ((cache[i].type == FRIEND) || ff_communication))
+//			if (cache[i].n.isUp() && ((cache[i].type == FRIEND) || ff_communication))
 			if((cache[i].n.isUp()) && (cache[i].type == FRIEND))
 				return cache[i].n;
 		}
@@ -111,7 +88,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		for (int i = index - 1; i >= 0; --i)
 			if ((cache[i].n.isUp()) && (cache[i].type == FRIEND))
 				return cache[i].n;
-
+		
 		if (ff_communication){
 			if ((result.isUp()) && (cache[index].type == FRIEND_FRIEND))
 				return result;
@@ -120,7 +97,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 				if((cache[i].n.isUp()) && (cache[i].type == FRIEND_FRIEND))
 					return cache[i].n;
 			}
-
+			
 			for (int i = index - 1; i >= 0; --i)
 				if ((cache[i].n.isUp()) && (cache[i].type == FRIEND_FRIEND))
 					return cache[i].n;
@@ -134,7 +111,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	{
 		return getPeer(ff_communication);
 	}
-
+	
 	public Node getFriendPeer()
 	{
 		return getPeer(false);
@@ -174,7 +151,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return null;
 	}
 
-	private void merge(Node thisNode, NodeEntry peerFriends[], Node peerNode)
+	private void merge(Node thisNode, NewscastSN peer, Node peerNode)
 	{
 		int i1 = 0;
 		int i2 = 0;
@@ -182,6 +159,17 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		boolean lastTieWinner = CommonState.r.nextBoolean();
 		int i = 1;
 
+		NodeEntry peerFriends[] = peer.getFriends();
+
+		//merge only with the peer friends that I already know
+		//HashSet<NodeEntry> tmp = new HashSet<NodeEntry>(Arrays.asList(peerFriends));
+
+		//int k = 0;
+//		for (k=cache.length-1; cache[k] == null && k > 0; k--);
+//		NodeEntry lcache[] = new NodeEntry[++k];
+//		System.arraycopy(cache, 0, lcache, 0, k);
+//		tmp.addAll(Arrays.asList(lcache));
+		
 		int finalSize = cache.length;
 		for (NodeEntry ne : peerFriends)
 			if (!contains(ne.n))
@@ -192,6 +180,12 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 			System.arraycopy(cache, 0, temp, 0, cache.length);
 			cache = temp;
 		}
+//		if (finalSize >= peer.cache.length) {
+//			NodeEntry[] temp = new NodeEntry[finalSize];
+//			System.arraycopy(peer.cache, 0, temp, 0, peer.cache.length);
+//			peer.cache = temp;
+//		}
+		
 
 		final int d1 = degree();
 		final int d2 = peerFriends.length;
@@ -207,23 +201,31 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 			}
 
 			if (first) {
-				if (cache[i1].n.getID() != peerNode.getID() && !NewscastED.contains(1, i, cache[i1].n, tn)) {
+				if (cache[i1].n.getID() != peerNode.getID() && !NewscastSN.contains(1, i, cache[i1].n, tn)) {
 					tn[i] = (NodeEntry)cache[i1].clone();
 					i++;
 				}
 				i1++;
 			} else {
 				if (peerFriends[i2].n.getID() != thisNode.getID()
-						&& !NewscastED.contains(1, i, peerFriends[i2].n, tn)) {
+						&& !NewscastSN.contains(1, i, peerFriends[i2].n, tn)) {
 					tn[i] = (NodeEntry)peerFriends[i2].clone();
+					//if current node has peer.cache[i2].n in its cache then it is a friend otherwise a friend of a friend
+					//tn[i].type = NewscastED.containsAsFriend(cache.length, peerFriends[i2].n, cache)? FRIEND : FRIEND_FRIEND;
 					i++;
 				}
 				i2++;
 			}
 		}
+
+		// if one of the original arrays got fully copied into
+		// tn and there is still place, fill the rest with the other
+		// array
 		if (i < cache.length) {
+			// only one of the for cycles will be entered
+
 			for (; i1 < d1 && i < cache.length; ++i1) {
-				if (cache[i1].n.getID() != peerNode.getID() && !NewscastED.contains(1, i, cache[i1].n, tn)) {
+				if (cache[i1].n.getID() != peerNode.getID() && !NewscastSN.contains(1, i, cache[i1].n, tn)) {
 					tn[i] = (NodeEntry)cache[i1].clone();
 					i++;
 				}
@@ -231,13 +233,16 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 
 			for (; i2 < d2 && i < cache.length; ++i2) {
 				if (peerFriends[i2].n.getID() != thisNode.getID()
-						&& !NewscastED.contains(1, i, peerFriends[i2].n, tn)) {
+						&& !NewscastSN.contains(1, i, peerFriends[i2].n, tn)) {
 					tn[i] = (NodeEntry)peerFriends[i2].clone();
+//					tn[i].type = NewscastED.containsAsFriend(cache.length, peerFriends[i2].n, cache)? FRIEND : FRIEND_FRIEND;
 					i++;
 				}
 			}
 		}
 
+		// if the two arrays were not enough to fill the buffer
+		// fill in the rest with nulls
 		if (i < cache.length) {
 			for (; i < cache.length; ++i) {
 				tn[i] = null;
@@ -261,45 +266,87 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 
 		for (int i = 0; i < cache.length && cache[i] != null; i++){
 			NodeEntry ne = cache[i];
-			if (ne.type == FRIEND) 
+			if (ne.type == FRIEND)
 				friends.add(ne);
 		}
 
 		return friends.toArray(new NodeEntry[0]);
 	}
 
-	public void processEvent(Node lnode, int thisPid, Object event)
+	public void processEvent(Node node, int pid, Object event) {
+//		nextCycle(node, pid);		
+	}
+
+	public void nextCycle(Node node, int protocolID) 
 	{
-		NewscastMessage message = (NewscastMessage)event;
-		if (message.isRequest()){
-			Transport tr = (Transport) lnode.getProtocol(c.tid);
-			NewscastMessage messsage = new NewscastMessage(lnode, false, getFriends());
-			tr.send(lnode, message.getSender(), messsage, thisPid);
+		Node peerNode = getPeer(node);
+		if (peerNode == null) {
+			System.err.println("Newscast: no accessible peer " + node.getID() + " " + this);
+			return;
 		}
 
-		int type = containsAsFriend(message.getSender())? FRIEND : FRIEND_FRIEND;
-
-		List<NodeEntry> rnodeCache = new ArrayList<NodeEntry>(); 
-		if (type == FRIEND_FRIEND){
-			for (NodeEntry ne : message.getCache())
-				if (containsAsFriend(ne.n))
-					rnodeCache.add(ne);
-			merge(lnode, rnodeCache.toArray(new NodeEntry[0]), message.getSender());
-		}
-		else
-			merge(lnode, message.getCache(), message.getSender());
-
-		for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++)
-			NewscastED.tn[k].type = containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
+		NewscastSN peer = (NewscastSN) (peerNode.getProtocol(protocolID));
+		int type = containsAsFriend(peerNode)? FRIEND : FRIEND_FRIEND;
 		
-		cache = new NodeEntry[NewscastED.tn.length];
-		System.arraycopy(NewscastED.tn, 0, cache, 0, cache.length);
+//		if (node.getID() == 180){
+//			System.out.println(node.getID() + "X" + peerNode.getID());
+//			System.out.println(this);
+//			System.out.println(peer);
+//		}
+
+		merge(node, peer, peerNode);
+		NodeEntry[] currentNodeCache = new NodeEntry[NewscastSN.tn.length];
+		for (int k = 1; k < NewscastSN.tn.length && NewscastSN.tn[k] != null; k++){
+//			System.out.print(contains(NewscastED.tn[k].n) + "," + NewscastED.tn[k].n.getID() + " ");
+			currentNodeCache[k] = (NodeEntry)NewscastSN.tn[k].clone();
+			currentNodeCache[k].type = containsAsFriend(NewscastSN.tn[k].n)? FRIEND : FRIEND_FRIEND;
+		}
+		
+		peer.merge(peerNode, this, node);
+		NodeEntry[] peerNodeCache = new NodeEntry[NewscastSN.tn.length];
+		for (int k = 1; k < NewscastSN.tn.length && NewscastSN.tn[k] != null; k++){
+			peerNodeCache[k] = (NodeEntry)NewscastSN.tn[k].clone();
+			peerNodeCache[k].type = peer.containsAsFriend(NewscastSN.tn[k].n)? FRIEND : FRIEND_FRIEND;
+		}
+		
+//		if (node.getID() == 180){
+//			System.out.println(node.getID() + "X" + peerNode.getID());
+//			System.out.println(this);
+//			System.out.println(peer);
+//			
+//			String fType = null;
+//			System.out.println("ZXXXX");
+//			for (int i = 1; i < NewscastED.tn.length && NewscastED.tn[i] != null; ++i) {
+//				fType = (NewscastED.tn[i].type == FRIEND)? "F": "FF";
+//				System.out.print(" (" + NewscastED.tn[i].n.getIndex() + "," + NewscastED.tn[i].ts + "," + fType + ")");
+//			}
+//			
+//			System.out.println();
+//		}
+		
+		cache = new NodeEntry[currentNodeCache.length];
+		peer.cache = new NodeEntry[peerNodeCache.length];
+		System.arraycopy(currentNodeCache, 0, cache, 0, cache.length);
+		System.arraycopy(peerNodeCache, 0, peer.cache, 0, peer.cache.length);
 
 		// set first element
 		cache[0] = new NodeEntry();
-		cache[0].ts = CommonState.getIntTime();
-		cache[0].type = type;
-		cache[0].n = message.getSender();
+		peer.cache[0] = new NodeEntry();
+		cache[0].ts = peer.cache[0].ts = CommonState.getIntTime();
+		cache[0].type = peer.cache[0].type = type;
+		cache[0].n = peerNode;
+		peer.cache[0].n = node;
+
+//		if (node.getID() == 180){ //61
+//			System.out.println(node.getID() + " " + peerNode.getID());
+//			System.out.println(this);
+//			System.out.println(peer);
+//		}
+		
+//		if (cache.length > 200 )
+//			System.out.println(node.getID() + " " + cache.length);
+		
+//		System.out.println(this);
 	}
 
 	public boolean addNeighbor(Node node) 
@@ -383,20 +430,6 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return false;
 	}
 
-	public void nextCycle(Node lnode, int protocolID)
-	{
-		Node peerNode = getPeer(lnode);
-		if (peerNode == null) {
-			System.err.println("Newscast: no accessible peer " + lnode.getID() + " " + this);
-			return;
-		}
-
-		Transport tr = (Transport) lnode.getProtocol(c.tid);
-		NewscastMessage messsage = new NewscastMessage(lnode, true, getFriends());
-		tr.send(lnode, peerNode, messsage, protocolID);
-	}
-
 
 
 }
-

@@ -1,12 +1,12 @@
 #Fat Jar Configuration File
-#Tue Dec 15 20:07:11 CET 2009
+#Sun Dec 20 12:32:55 CET 2009
 onejar.license.required=true
 manifest.classpath=
 manifest.removesigners=true
 onejar.checkbox=false
-jarname=/home/zando/Desktop/peersimSN.jar
-manifest.mergeall=true
-manifest.mainclass=peersim.Simulator
+jarname=/home/zando/uni/specialistica/tesi/test/peersimSN.jar
+manifest.mergeall=false
+manifest.mainclass=peersim.rangesim.RangeSimulator
 manifest.file=<createnew>
 jarname.isextern=true
 onejar.expand=
