@@ -69,7 +69,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public Node selectPeer(Node lnode)
 	{
-		return ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer();
+		return ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode);
 	}
 
 	public boolean isInfected()
