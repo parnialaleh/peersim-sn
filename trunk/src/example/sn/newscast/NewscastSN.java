@@ -159,7 +159,7 @@ public class NewscastSN implements EDProtocol, CDProtocol, LinkableSN
 		boolean lastTieWinner = CommonState.r.nextBoolean();
 		int i = 1;
 
-		NodeEntry peerFriends[] = peer.getFriends();
+		NodeEntry peerFriends[] = peer.getFriends(thisNode);
 
 		//merge only with the peer friends that I already know
 		//HashSet<NodeEntry> tmp = new HashSet<NodeEntry>(Arrays.asList(peerFriends));
@@ -260,7 +260,7 @@ public class NewscastSN implements EDProtocol, CDProtocol, LinkableSN
 		return false;
 	}
 
-	public NodeEntry[] getFriends()
+	public NodeEntry[] getFriends(Node n)
 	{
 		List<NodeEntry> friends = new ArrayList<NodeEntry>();
 
@@ -428,6 +428,16 @@ public class NewscastSN implements EDProtocol, CDProtocol, LinkableSN
 				return true;
 		}
 		return false;
+	}
+
+	public boolean containsAsFriend(Node lnode, Node n) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public Node getFriendPeer(Node n) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

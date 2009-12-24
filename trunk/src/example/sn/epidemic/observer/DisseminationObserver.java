@@ -5,7 +5,6 @@ import java.util.List;
 import example.sn.NewsManager;
 import example.sn.epidemic.message.News;
 import example.sn.newscast.NewscastED;
-import example.sn.newscast.NewscastSN;
 import example.sn.newscast.NodeEntry;
 
 import peersim.config.Configuration;
@@ -53,7 +52,7 @@ public class DisseminationObserver implements Control
 
 			ncast = (NewscastED)n.getProtocol(pidNewscast);
 			//Friend list
-			friends = ncast.getFriends();
+			friends = ncast.getFriends(n);
 
 			for (News nw : news){
 				know = 0;

@@ -1,7 +1,6 @@
 package example.sn.newscast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import peersim.cdsim.CDProtocol;
@@ -94,20 +93,14 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		int index = CommonState.r.nextInt(d);
 		Node result = cache[index].n;
 
-		//		System.out.println(result.getID() + " " + cache[index].type);
-		//if ((result.isUp()) && ((cache[index].type == FRIEND) || ff_communication))
 		if ((result.isUp()) && (cache[index].type == FRIEND))
 			return result;
 
-		// proceed towards older entries
 		for (int i = index + 1; i < d; ++i){
-			//			System.out.println(cache[i].n.getID() + " " + cache[i].n.isUp() + " " + cache[i].type);
-			//				if (cache[i].n.isUp() && ((cache[i].type == FRIEND) || ff_communication))
 			if((cache[i].n.isUp()) && (cache[i].type == FRIEND))
 				return cache[i].n;
 		}
 
-		// proceed towards younger entries
 		for (int i = index - 1; i >= 0; --i)
 			if ((cache[i].n.isUp()) && (cache[i].type == FRIEND))
 				return cache[i].n;
@@ -135,9 +128,12 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return getPeer(ff_communication);
 	}
 
-	public Node getFriendPeer()
+	public Node getFriendPeer(Node lnode)
 	{
-		return getPeer(false);
+		Node n = getPeer(false);
+		if (n == null)
+			return ((LinkableSN)lnode.getProtocol(idle_protocol)).getFriendPeer(lnode);
+		return n;
 	}
 
 	private Node getPeer(Node node)
@@ -165,11 +161,11 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 
 		for (int i = index + 1; i < d; ++i)
 			if (idle.getNeighbor(i).isUp())
-				return cache[i].n;
+				return idle.getNeighbor(i);
 
 		for (int i = index - 1; i >= 0; --i)
 			if (idle.getNeighbor(i).isUp())
-				return cache[i].n;
+				return idle.getNeighbor(i);
 
 		return null;
 	}
@@ -255,7 +251,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return false;
 	}
 
-	public NodeEntry[] getFriends()
+	public NodeEntry[] getFriends(Node n)
 	{
 		List<NodeEntry> friends = new ArrayList<NodeEntry>();
 
@@ -265,6 +261,10 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 				friends.add(ne);
 		}
 
+		LinkableSN idle = (LinkableSN)n.getProtocol(idle_protocol);
+		for (NodeEntry ne : idle.getFriends(n))
+			friends.add(ne);
+
 		return friends.toArray(new NodeEntry[0]);
 	}
 
@@ -273,33 +273,39 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		NewscastMessage message = (NewscastMessage)event;
 		if (message.isRequest()){
 			Transport tr = (Transport) lnode.getProtocol(c.tid);
-			NewscastMessage messsage = new NewscastMessage(lnode, false, getFriends());
+			NewscastMessage messsage = new NewscastMessage(lnode, false, getFriends(lnode));
 			tr.send(lnode, message.getSender(), messsage, thisPid);
 		}
 
-		int type = containsAsFriend(message.getSender())? FRIEND : FRIEND_FRIEND;
+		int type = containsAsFriend(lnode, message.getSender())? FRIEND : FRIEND_FRIEND;
 
 		List<NodeEntry> rnodeCache = new ArrayList<NodeEntry>(); 
-		if (type == FRIEND_FRIEND){
-			for (NodeEntry ne : message.getCache())
-				if (containsAsFriend(ne.n))
-					rnodeCache.add(ne);
-			merge(lnode, rnodeCache.toArray(new NodeEntry[0]), message.getSender());
+
+		LinkableSN idle = (LinkableSN)lnode.getProtocol(idle_protocol);
+		for (NodeEntry ne : message.getCache()){
+			if (!idle.contains(ne.n) && contains(ne.n))
+				rnodeCache.add(ne);			
 		}
-		else
-			merge(lnode, message.getCache(), message.getSender());
 
-		for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++)
-			NewscastED.tn[k].type = containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
-		
-		cache = new NodeEntry[NewscastED.tn.length];
-		System.arraycopy(NewscastED.tn, 0, cache, 0, cache.length);
+		if (rnodeCache.size() > 0){
+			merge(lnode, rnodeCache.toArray(new NodeEntry[0]), message.getSender());
+			for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++)
+				NewscastED.tn[k].type = containsAsFriend(lnode, NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
+		}
 
-		// set first element
-		cache[0] = new NodeEntry();
-		cache[0].ts = CommonState.getIntTime();
-		cache[0].type = type;
-		cache[0].n = message.getSender();
+		if (contains(message.getSender())){
+			NewscastED.tn[0] = new NodeEntry();
+			NewscastED.tn[0].ts = CommonState.getIntTime();
+			NewscastED.tn[0].type = type;
+			NewscastED.tn[0].n = message.getSender();
+			cache = new NodeEntry[NewscastED.tn.length];
+			System.arraycopy(NewscastED.tn, 0, cache, 0, cache.length);
+		}
+		else{
+			cache = new NodeEntry[NewscastED.tn.length - 1];
+			System.arraycopy(NewscastED.tn, 1, cache, 0, cache.length);
+		}
+
 	}
 
 	public boolean addNeighbor(Node node) 
@@ -374,13 +380,15 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return sb.toString();
 	}
 
-	public boolean containsAsFriend(Node n)
+	public boolean containsAsFriend(Node lnode, Node n)
 	{
 		for (int i = 0; i < cache.length && cache[i] != null; i++) {
 			if ((cache[i].n.getID() == n.getID()) && (cache[i].type == FRIEND))
 				return true;
 		}
-		return false;
+
+		LinkableSN idle = (LinkableSN)lnode.getProtocol(idle_protocol);
+		return idle.containsAsFriend(lnode, n);
 	}
 
 	public void nextCycle(Node lnode, int protocolID)
@@ -392,7 +400,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		}
 
 		Transport tr = (Transport) lnode.getProtocol(c.tid);
-		NewscastMessage messsage = new NewscastMessage(lnode, true, getFriends());
+		NewscastMessage messsage = new NewscastMessage(lnode, true, getFriends(lnode));
 		tr.send(lnode, peerNode, messsage, protocolID);
 	}
 

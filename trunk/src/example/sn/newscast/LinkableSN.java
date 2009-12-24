@@ -14,8 +14,10 @@ public interface LinkableSN extends Linkable
 	 * @param n Note to search
 	 * @return true if n is found and is a friend, false otherwise
 	 */
-	public boolean containsAsFriend(Node n);
+	public boolean containsAsFriend(Node lnode, Node n);
 	
-	public Node getFriendPeer();
+	public Node getFriendPeer(Node n);
+	
+	public NodeEntry[] getFriends(Node n);
 
 }

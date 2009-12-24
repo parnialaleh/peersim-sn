@@ -68,7 +68,7 @@ public class NewsManager implements EDProtocol
 			//if (n.getNode().getID() == lnode.getID() || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()))
 			
 			//mine news or news of my friends
-			if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()))// || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
+			if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(lnode, n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(lnode, n.getNode()))
 				list.add(n);				
 		
 		return list;

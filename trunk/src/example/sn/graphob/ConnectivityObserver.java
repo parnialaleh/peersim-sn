@@ -9,46 +9,34 @@ import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
-import peersim.core.Linkable;
 import peersim.core.Network;
-import peersim.core.Node;
 import peersim.util.IncrementalStats;
 
 public class ConnectivityObserver implements Control {
 
-	private static final String PAR_PROT = "protocol";
+	private static final String PAR_PROT_NCAST = "protocol.ncast";
+	private static final String PAR_PROT_IDLE = "protocol.idle";
 
 	private final String name;
-
-	private final int pid;
-
+	private final int pidNcast;
+	private final int pidIdle;
 	private int nodes = 0;
-
 	private int[] n;
-
 	private static final int WHITE = 0;
-
 	private static final int GRAY = 1;
-
 	private static final int BLACK = 2;
-
 	private UpperGraph ug = null;
-
 	private int color[];
-
 	private int parent[];
-
 	private int dt[];
-
 	private int ft[];
-
 	private int time = 0;
-	
 	private int networksize = 0;
-
+	
 	public ConnectivityObserver(String name) {
 		this.name = name;
-		pid = Configuration.getPid(name + "." + PAR_PROT);
+		pidNcast = Configuration.getPid(name + "." + PAR_PROT_NCAST);
+		pidIdle = Configuration.getPid(name + "." + PAR_PROT_IDLE);
 	}
 
 	// ------------------------------------------
@@ -200,12 +188,20 @@ public class ConnectivityObserver implements Control {
 		for (i = 0; i < node.size(); ++i) {
 			n[i] = i;
 			tmp = node.get(i);
-			linkable = (LinkableSN) tmp.getProtocol(pid);
+			linkable = (LinkableSN) tmp.getProtocol(pidNcast);
 			nDegree = linkable.degree();
 			for (j = 0; j < nDegree; ++j){
 				nd = (SNNode)linkable.getNeighbor(j);
 				if (((SNNode)nd).isUp()){
 					ug.addEdge(i, node.indexOf(linkable.getNeighbor(j)));
+				}
+			}
+			linkable = (LinkableSN) tmp.getProtocol(pidIdle);
+			nDegree = linkable.degree();
+			for (j = 0; j < nDegree; ++j){
+				nd = (SNNode)linkable.getNeighbor(j);
+				if (((SNNode)nd).isUp()){
+					ug.addEdge(i, node.indexOf(nd));
 				}
 			}
 		}
@@ -229,9 +225,9 @@ public class ConnectivityObserver implements Control {
 			else
 				hm.put(uf.findSet(i), new Integer(v.intValue() + 1));
 		}
-		Iterator it = hm.values().iterator();
+		Iterator<Integer> it = hm.values().iterator();
 		while (it.hasNext()) {
-			is.add(((Integer) it.next()).intValue());
+			is.add((it.next()).intValue());
 		}
 	}
 
@@ -253,16 +249,6 @@ public class ConnectivityObserver implements Control {
 
 		// stampa risultato visita
 		System.out.println(CommonState.getTime() + " " + name + ": " + is + " " + networksize);
-		
-//		IncrementalStats isCache = new IncrementalStats();
-//		
-//		Node n;
-//		for (int i = 0; i < Network.size(); i++){
-//			n = Network.get(i);
-//			if (n.isUp())
-//				isCache.add(((Linkable)n.getProtocol(pid)).degree());
-//		}
-//		System.out.println(CommonState.getTime() + " " + name + "Cache: " + isCache);
 
 		return false;
 	}

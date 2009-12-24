@@ -3,16 +3,15 @@ package example.sn.epidemic.control;
 import java.util.HashSet;
 import java.util.Set;
 
-import example.sn.NewsManager;
-import example.sn.epidemic.message.NewsFriendship;
-import example.sn.epidemic.message.NewsStatusChange;
-import example.sn.newscast.NewscastSN;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
-import peersim.core.IdleProtocol;
 import peersim.core.Network;
 import peersim.core.Node;
+import example.sn.NewsManager;
+import example.sn.epidemic.message.NewsFriendship;
+import example.sn.epidemic.message.NewsStatusChange;
+import example.sn.newscast.LinkableSN;
 
 public class AddNews implements Control
 {
@@ -64,13 +63,13 @@ public class AddNews implements Control
 		}
 
 		s = new HashSet<Integer>();
-		IdleProtocol idle;
-		NewscastSN newscast;
+		LinkableSN idle;
+		LinkableSN newscast;
 		while (s.size() < friendshipNo){
 			i = CommonState.r.nextInt(size);
 			if (!s.contains(i)){
-				idle = (IdleProtocol)Network.get(i).getProtocol(pidIdle);
-				newscast = (NewscastSN)Network.get(i).getProtocol(pidNewscast);
+				idle = (LinkableSN)Network.get(i).getProtocol(pidIdle);
+				newscast = (LinkableSN)Network.get(i).getProtocol(pidNewscast);
 
 				Node n = Network.get(CommonState.r.nextInt(size));
 				if (!idle.contains(n) && !newscast.contains(n)){				
