@@ -17,26 +17,33 @@ public class ConnectivityObserver implements Control {
 	private static final String PAR_PROT_NCAST = "protocol.ncast";
 	private static final String PAR_PROT_IDLE = "protocol.idle";
 
-	private final String name;
-	private final int pidNcast;
-	private final int pidIdle;
-	private int nodes = 0;
-	private int[] n;
-	private static final int WHITE = 0;
-	private static final int GRAY = 1;
-	private static final int BLACK = 2;
-	private UpperGraph ug = null;
-	private int color[];
-	private int parent[];
-	private int dt[];
-	private int ft[];
-	private int time = 0;
-	private int networksize = 0;
+	protected final String name;
+	protected final int pidNcast;
+	protected final int pidIdle;
+	protected int nodes = 0;
+	protected int[] n;
+	protected static final int WHITE = 0;
+	protected static final int GRAY = 1;
+	protected static final int BLACK = 2;
+	protected UpperGraph ug = null;
+	protected int color[];
+	protected int parent[];
+	protected int dt[];
+	protected int ft[];
+	protected int time = 0;
+	protected int networksize = 0;
 	
 	public ConnectivityObserver(String name) {
 		this.name = name;
 		pidNcast = Configuration.getPid(name + "." + PAR_PROT_NCAST);
 		pidIdle = Configuration.getPid(name + "." + PAR_PROT_IDLE);
+	}
+	
+	public ConnectivityObserver(int pidNcast, int pidIdle)
+	{
+		this.pidNcast = pidNcast;
+		this.pidIdle = pidIdle;
+		this.name = "";
 	}
 
 	// ------------------------------------------
@@ -61,7 +68,7 @@ public class ConnectivityObserver implements Control {
 		color[i] = BLACK;
 	}
 
-	private void dfs() {
+	protected void dfs() {
 		int i = 0;
 		time = 0;
 
@@ -79,7 +86,7 @@ public class ConnectivityObserver implements Control {
 
 	// ------------------------------------------
 	// dfs sul grafo trasposto
-	private void dfsVisitT(int i) {
+	protected void dfsVisitT(int i) {
 		int v = -1;
 		int uDegree = ug.reverseDegree(i);
 
@@ -99,7 +106,7 @@ public class ConnectivityObserver implements Control {
 		color[i] = BLACK;
 	}
 
-	private void dfsT() {
+	protected void dfsT() {
 		int i = 0;
 
 		for (i = 0; i < nodes; ++i) {

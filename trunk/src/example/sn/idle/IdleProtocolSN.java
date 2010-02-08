@@ -101,8 +101,8 @@ public class IdleProtocolSN implements Protocol, LinkableSN
 	{
 		int degree = len;
 
-		for (int i = 0; i < neighbors.length && neighbors[i] != null; i++)
-			degree += ((IdleProtocolSN)neighbors[i].n.getProtocol(pid)).localDegree();
+		//for (int i = 0; i < neighbors.length && neighbors[i] != null; i++)
+		//	degree += ((IdleProtocolSN)neighbors[i].n.getProtocol(pid)).localDegree();
 
 		return degree;
 	}
