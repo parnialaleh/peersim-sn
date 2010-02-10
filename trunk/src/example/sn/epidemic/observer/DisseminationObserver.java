@@ -4,8 +4,10 @@ import java.util.List;
 
 import example.sn.NewsManager;
 import example.sn.epidemic.message.News;
+import example.sn.newscast.LinkableSN;
 import example.sn.newscast.NewscastED;
 import example.sn.newscast.NodeEntry;
+import example.sn.node.SNNode;
 
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -18,18 +20,15 @@ public class DisseminationObserver implements Control
 {
 	private static final String PAR_PROTOCOL_NEWS = "protocol.news";
 	private static final String PAR_PROTOCOL_NEWSCAST = "protocol.newscast";
-//	private static final String PAR_PROTOCOL_IDLE = "protocol.idle";
 
 	private final int pidNews;
 	private final int pidNewscast;
-//	private final int pidIdle;
 	private final String name;
 
 	public DisseminationObserver(String n)
 	{
 		this.pidNews = Configuration.getPid(n + "." + PAR_PROTOCOL_NEWS);
 		this.pidNewscast = Configuration.getPid(n + "." + PAR_PROTOCOL_NEWSCAST);
-//		this.pidIdle = Configuration.getPid(n + "." + PAR_PROTOCOL_IDLE);
 		this.name = n;
 	}
 
@@ -38,7 +37,7 @@ public class DisseminationObserver implements Control
 	{
 		List<News> news = null;
 		Node n = null;
-		NewscastED ncast = null;
+		LinkableSN ncast = null;
 		NodeEntry[] friends = null;
 		int know = 0;
 		int friendsNo = 0;
@@ -50,7 +49,8 @@ public class DisseminationObserver implements Control
 			//News list
 			news = ((NewsManager)n.getProtocol(pidNews)).getOwnNews(n);
 
-			ncast = (NewscastED)n.getProtocol(pidNewscast);
+			ncast = (LinkableSN)n.getProtocol(pidNewscast);
+
 			//Friend list
 			friends = ncast.getFriends(n);
 
@@ -63,7 +63,7 @@ public class DisseminationObserver implements Control
 							know++;
 						friendsNo++;
 					}
-				System.out.println(n.getID() + " " + " " + friendsNo + " " + know + " " + friends.length + " " + ncast.degree());
+				System.out.println(n.getID() + " " + ((SNNode)n).getRealID() + " " + " " + friendsNo + " " + know + " " + friends.length);
 				stats.add((double)know / (double)friendsNo);
 			}
 		}

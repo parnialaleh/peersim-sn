@@ -52,7 +52,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	 * Last selected peer
 	 */
 	private SNNode lastSelectedPeer = null;
-	
+
 	private final String name;
 	private final int thisPid;
 
@@ -81,7 +81,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		thisPid = CommonState.getPid();
 
 		c = new CommonData();
-		
+
 		name = n;
 
 		// Read other parameters
@@ -147,7 +147,6 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 	{
 		int sizeSoFar = 0;
 		for (int j = 0; j < list.size(); j++){
-			System.err.println(i + " " + list.get(j).size() + " " + j);
 			if (list.get(j).size() > i-sizeSoFar)
 				return list.get(j).get(i-sizeSoFar);
 			sizeSoFar += list.get(j).size();
@@ -162,7 +161,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		int index = CommonState.r.nextInt(size);
 		Node result = getNode(index, list);
 
-		if ( result.isUp())
+		if (result.isUp())
 			return result;
 
 		for (int i = index + 1; i < size; ++i){
@@ -172,6 +171,28 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 
 		for (int i = index - 1; i >= 0; --i)
 			if (getNode(i, list).isUp())
+				return cache[i].n;
+
+		return null;
+	}
+
+	private Node getFriendPeer(List<Node> list)
+	{
+		if (list.size() == 0)
+			return null;
+		int index = CommonState.r.nextInt(list.size());
+		Node result = list.get(index);
+
+		if (result.isUp())
+			return result;
+
+		for (int i = index + 1; i < list.size(); ++i){
+			if (list.get(index).isUp())
+				return cache[i].n;
+		}
+
+		for (int i = index - 1; i >= 0; --i)
+			if (list.get(index).isUp())
 				return cache[i].n;
 
 		return null;
@@ -194,24 +215,42 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return false;
 	}
 
+	private boolean isFriend(Node n)
+	{
+		for (NodeEntry ne : cache)
+			if (ne != null)
+				if (n == ne.n && ne.type == FRIEND)
+					return true;
+
+		LinkableSN linkable = (LinkableSN)CommonState.getNode().getProtocol(idle_protocol);
+		for (int i = 0; i < linkable.degree(); i++)
+			if (linkable.getNeighbor(i).getID() == n.getID())
+				return true;
+
+		return false;
+	}
+
 	public Node getFriendPeer(Node lnode)
 	{
-		System.out.println("XXX " + thisPid);
 		AnalizeFriends a = new AnalizeFriends(thisPid, idle_protocol, (SNNode)lnode);
-
-		int size = 0;
 		List<List<Node>> list = a.analize();
-		for (List<Node> lst : list)
-			size += lst.size();
+		List<Node> friendList = new ArrayList<Node>();
 
-		System.out.println("qui");
-		Node n = getFriendPeer(list, size);
-		System.out.println(n);
+		for (List<Node> lst : list){
+			for (Node n : lst)
+				if (isFriend(n))
+					friendList.add(n);
+		}
 
-		while ((isInSameCluster(n, lastSelectedPeer, list)) && (list.size() > 1) && (n != null))
-			n = getFriendPeer(list, size);
+		Node n = getFriendPeer(friendList);
 
-		System.out.println(n);
+		System.out.println(lnode.getID() + " " + n.getID() + " " + list.size());
+		while ((isInSameCluster(n, lastSelectedPeer, list)) && (list.size() > 1) && (n != null)){
+			n = getFriendPeer(friendList);
+			System.out.println(lnode.getID() + " " + n.getID()+ " " + list.size() );
+		}
+
+		lastSelectedPeer = (SNNode)n;
 		return n;
 
 		//Node n = getPeer(false);
@@ -354,7 +393,6 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 
 	public void processEvent(Node lnode, int thisPid, Object event)
 	{
-		System.out.println("////////////////");
 		NewscastMessage message = (NewscastMessage)event;
 		if (message.isRequest()){
 			Transport tr = (Transport) lnode.getProtocol(c.tid);
@@ -390,9 +428,6 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 			cache = new NodeEntry[NewscastED.tn.length - 1];
 			System.arraycopy(NewscastED.tn, 1, cache, 0, cache.length);
 		}
-		
-		System.out.println(this);
-
 	}
 
 	public boolean addNeighbor(Node node) 

@@ -125,12 +125,13 @@ public class InitSocialNetwork implements Control
 			
 			adjustNetworkSize(ids.size());
 
-			
 			d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(fileName))))));
 			while ((line = d.readLine()) != null){
-				tmp = line.split(" ");
+				tmp = line.split(" ");				
 				source = ids.indexOf(Long.parseLong(tmp[0]));
 				friend = ids.indexOf(Long.parseLong(tmp[1]));
+				((SNNode)Network.get(source)).setRealID(Long.parseLong(tmp[0]));
+				((SNNode)Network.get(friend)).setRealID(Long.parseLong(tmp[1]));
 				
 				((Linkable)Network.get(source).getProtocol(pid)).addNeighbor(Network.get(friend));
 				((Linkable)Network.get(friend).getProtocol(pid)).addNeighbor(Network.get(source));				
