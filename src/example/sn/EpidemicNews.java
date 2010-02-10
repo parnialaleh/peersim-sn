@@ -8,6 +8,7 @@ import peersim.extras.am.epidemic.bcast.Infectable;
 import example.sn.epidemic.message.EpidemicHashMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
 import example.sn.newscast.LinkableSN;
+import example.sn.node.SNNode;
 
 public class EpidemicNews implements EpidemicProtocol, Infectable
 {	
@@ -42,6 +43,10 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public void merge(Node lnode, Node rnode, Message msg) {
 		boolean res = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
+
+		if (res)
+			System.out.println(lnode.getID() + "->" + rnode.getID() + " " + ((SNNode)lnode).getRealID() + "->" + ((SNNode)rnode).getRealID() + " " + res);
+		
 		infected =  res || infected;
 	}
 
@@ -67,7 +72,6 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public Node selectPeer(Node lnode)
 	{
-		System.out.println("pippo");
 		return ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode);
 	}
 

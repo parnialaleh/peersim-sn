@@ -12,6 +12,7 @@ import example.sn.NewsManager;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.epidemic.message.NewsStatusChange;
 import example.sn.newscast.LinkableSN;
+import example.sn.node.SNNode;
 
 public class AddNews implements Control
 {
@@ -22,6 +23,7 @@ public class AddNews implements Control
 	private static final String PAR_STATUS_CHANGE = "statusChangeNo";
 	private static final String PAR_START_PROTOCOL = "starttime";
 	private static final String PAR_END_PROTOCOL = "endtime";
+	private static final String PAR_ROOT = "root";
 
 	private final int pidNewsManager;
 	private final int pidIdle;
@@ -30,6 +32,7 @@ public class AddNews implements Control
 	private final int statusChangeNo;
 	private final long startTime;
 	private final long endTime;
+	private final long root;
 
 	public AddNews(String n)
 	{
@@ -40,6 +43,16 @@ public class AddNews implements Control
 		this.statusChangeNo = Configuration.getInt(n + "." + PAR_STATUS_CHANGE);
 		this.startTime = Configuration.getLong(n + "." + PAR_START_PROTOCOL, Long.MIN_VALUE);
 		this.endTime = Configuration.getLong(n + "." + PAR_END_PROTOCOL, Long.MAX_VALUE);
+		this.root = Configuration.getLong(n + "." + PAR_ROOT);
+	}
+	
+	private int indexOf(long nodeRealID)
+	{
+		for (int i = 0; i < Network.size(); i++)
+			if (((SNNode)Network.get(i)).getRealID() == nodeRealID)
+				return i;
+		
+		return -1;
 	}
 
 
@@ -55,7 +68,7 @@ public class AddNews implements Control
 		NewsManager newsManager;
 		while (s.size() < statusChangeNo){
 			//i = CommonState.r.nextInt(size);
-			i = 0;
+			i = indexOf(root);
 			if (!s.contains(i) && Network.get(i).isUp()){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				newsManager.addNews(new NewsStatusChange(Network.get(i)), Network.get(i));

@@ -5,6 +5,7 @@ import peersim.core.GeneralNode;
 public class SNNode extends GeneralNode
 {
 	private boolean isOnline = false;
+	private long realID = -1;
 
 	public SNNode(String n)
 	{
@@ -18,6 +19,14 @@ public class SNNode extends GeneralNode
 
 	public boolean isUp() {
 		return isOnline;
+	}
+
+	public void setRealID(long realID) {
+		this.realID = realID;
+	}
+
+	public long getRealID() {
+		return realID;
 	}
 
 }

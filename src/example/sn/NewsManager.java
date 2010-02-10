@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -100,7 +101,8 @@ public class NewsManager implements EDProtocol
 			}
 
 		Collections.sort(this.news);
-//		System.err.println("Merge " + addSomething);
+//		if (addSomething)
+//			System.err.println("Merge " + addSomething);
 		return addSomething;
 	}
 
