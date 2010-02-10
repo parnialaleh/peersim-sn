@@ -54,6 +54,11 @@ public class UpperGraph
 		tmp = graph.get(j);
 		tmp.add(new Long(i));
 	}
+	
+	public int degree()
+	{
+		return graph.size();
+	}
 
 	public int degree(int i)
 	{
