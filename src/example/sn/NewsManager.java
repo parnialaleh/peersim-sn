@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -13,7 +12,8 @@ import peersim.edsim.EDProtocol;
 import example.sn.epidemic.message.News;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.newscast.LinkableSN;
-import example.sn.newscast.NewscastSN;
+import example.sn.newscast.NewscastED;
+import example.sn.node.SNNode;
 
 /**
  * Class to manage all news.
@@ -58,23 +58,45 @@ public class NewsManager implements EDProtocol
 	{
 		this.news.add(news);
 		if (news instanceof NewsFriendship)
-			((NewscastSN)n.getProtocol(pidNetworkManger)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
+			((NewscastED)n.getProtocol(pidNetworkManger)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
 	}
 	
+	/**
+	 * 
+	 * @return the whole list of messages
+	 */
+	public List<News> getNews()
+	{
+		return news;
+	}
+	
+	/**
+	 * 
+	 * @param lnode
+	 * @param rnode
+	 * @return the list of messages of lnode where the author is a friend in common with rnode
+	 */
 	public List<News> getNews(Node lnode, Node rnode)
 	{
 		List<News> list = new ArrayList<News>();
 		
 		for (News n: news)
-			//if (n.getNode().getID() == lnode.getID() || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()))
-			
-			//mine news or news of my friends
-			if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(lnode, n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(lnode, n.getNode()))
-				list.add(n);				
+			if (((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(rnode) || ((LinkableSN)n.getNode().getProtocol(pidIdle)).containsAsFriend(rnode))
+				list.add(n);
+			/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
+				list.add(n);*/
+		
+//		if (((SNNode)lnode).getRealID() == 1455300416)
+//			System.err.println(list.size() + " " + ((SNNode)rnode).getRealID());
 		
 		return list;
 	}
 	
+	/**
+	 * 
+	 * @param lnode
+	 * @return the news of lnode
+	 */
 	public List<News> getOwnNews(Node lnode)
 	{
 		List<News> list = new ArrayList<News>();

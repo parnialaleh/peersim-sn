@@ -52,7 +52,7 @@ public class DisseminationObserver implements Control
 			ncast = (LinkableSN)n.getProtocol(pidNewscast);
 
 			//Friend list
-			friends = ncast.getFriends(n);
+			friends = ncast.getFriends(n, n);
 
 			for (News nw : news){
 				know = 0;
