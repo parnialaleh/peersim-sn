@@ -3,6 +3,7 @@ package example.sn.newscast;
 import java.util.ArrayList;
 import java.util.List;
 
+import example.sn.idle.IdleProtocolSN;
 import example.sn.newscast.clustering.AnalizeFriends;
 import example.sn.node.SNNode;
 
@@ -14,7 +15,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
-public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
+public class NewscastED extends LinkableSN implements EDProtocol, CDProtocol
 {
 
 	/**
@@ -181,6 +182,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		if (list.size() == 0)
 			return null;
 		int index = CommonState.r.nextInt(list.size());
+		//		System.out.println(index + " " + list.size());
 		Node result = list.get(index);
 
 		if (result.isUp())
@@ -230,9 +232,10 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return false;
 	}
 
-	public Node getFriendPeer(Node lnode)
+	public Node getFriendPeer(Node lnode, Node n)
 	{
-		AnalizeFriends a = new AnalizeFriends(thisPid, idle_protocol, (SNNode)lnode);
+		/*******
+		 * AnalizeFriends a = new AnalizeFriends(thisPid, idle_protocol, (SNNode)lnode);
 		List<List<Node>> list = a.analize();
 		List<Node> friendList = new ArrayList<Node>();
 
@@ -244,10 +247,10 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 
 		Node n = getFriendPeer(friendList);
 
-		System.out.println(lnode.getID() + " " + n.getID() + " " + list.size());
-		while ((isInSameCluster(n, lastSelectedPeer, list)) && (list.size() > 1) && (n != null)){
+//		System.out.println(lnode.getID() + " " + n.getID() + " " + list.size());
+		while ((isInSameCluster(n, lastSelectedPeer, list)) && (list.size() > 1) && (friendList.size() > 1) && (n != null)){
 			n = getFriendPeer(friendList);
-			System.out.println(lnode.getID() + " " + n.getID()+ " " + list.size() );
+//			System.out.println(lnode.getID() + " " + n.getID()+ " " + list.size() );
 		}
 
 		lastSelectedPeer = (SNNode)n;
@@ -256,10 +259,22 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		//Node n = getPeer(false);
 		//if (n == null)
 		//	return ((LinkableSN)lnode.getProtocol(idle_protocol)).getFriendPeer(lnode);
-		//return n;
+		//return n;*/
+
+		LinkableSN linkable = (LinkableSN)CommonState.getNode().getProtocol(idle_protocol);
+		NodeEntry[] nodesEntryIdle = linkable.getFriends(lnode, n);
+		NodeEntry[] nodesEntry = getFriends(lnode, n);
+
+		int i = CommonState.r.nextInt(nodesEntry.length + nodesEntryIdle.length);
+
+		if (((SNNode)lnode).getRealID() == 1455300416)
+			//System.err.println(nodesEntry.length + " " + nodesEntryIdle.length + " " + ((SNNode)lnode).getRealID() + " " + ((SNNode)n).getRealID());
+			System.err.println((i < nodesEntry.length)? ((SNNode)nodesEntry[i].n).getRealID() : ((SNNode)nodesEntryIdle[i - nodesEntry.length].n).getRealID() + " XXXX");
+		
+		return (i < nodesEntry.length)? nodesEntry[i].n : nodesEntryIdle[i - nodesEntry.length].n;		
 	}
 
-	private Node getPeer(Node node)
+	public Node getPeer(Node node)
 	{
 		Linkable idle = (Linkable)node.getProtocol(idle_protocol);
 
@@ -374,8 +389,9 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return false;
 	}
 
-	public NodeEntry[] getFriends(Node n)
+	public NodeEntry[] getFriends(Node lnode, Node n)
 	{
+		/*
 		List<NodeEntry> friends = new ArrayList<NodeEntry>();
 
 		for (int i = 0; i < cache.length && cache[i] != null; i++){
@@ -389,6 +405,16 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 			friends.add(ne);
 
 		return friends.toArray(new NodeEntry[0]);
+		 **/
+
+		if (lnode.getID() == n.getID())
+			return getFriends(cache);
+		else
+			for (int j = 0; j < cache.length && cache[j] != null; j++)
+				if (cache[j].n.getID() == n.getID())
+					return getFriends(((NewscastED)cache[j].n.getProtocol(thisPid)).cache);
+
+		return new NodeEntry[0];
 	}
 
 	public void processEvent(Node lnode, int thisPid, Object event)
@@ -396,11 +422,11 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		NewscastMessage message = (NewscastMessage)event;
 		if (message.isRequest()){
 			Transport tr = (Transport) lnode.getProtocol(c.tid);
-			NewscastMessage messsage = new NewscastMessage(lnode, false, getFriends(lnode));
+			NewscastMessage messsage = new NewscastMessage(lnode, false, getFriends(lnode, lnode));
 			tr.send(lnode, message.getSender(), messsage, thisPid);
 		}
 
-		int type = containsAsFriend(lnode, message.getSender())? FRIEND : FRIEND_FRIEND;
+		int type = containsAsFriend(message.getSender())? FRIEND : FRIEND_FRIEND;
 
 		List<NodeEntry> rnodeCache = new ArrayList<NodeEntry>(); 
 
@@ -413,7 +439,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		if (rnodeCache.size() > 0){
 			merge(lnode, rnodeCache.toArray(new NodeEntry[0]), message.getSender());
 			for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++)
-				NewscastED.tn[k].type = containsAsFriend(lnode, NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
+				NewscastED.tn[k].type = containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
 		}
 
 		if (contains(message.getSender())){
@@ -503,15 +529,15 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 		return sb.toString();
 	}
 
-	public boolean containsAsFriend(Node lnode, Node n)
+	public boolean containsAsFriend(Node n)
 	{
 		for (int i = 0; i < cache.length && cache[i] != null; i++) {
 			if ((cache[i].n.getID() == n.getID()) && (cache[i].type == FRIEND))
 				return true;
 		}
 
-		LinkableSN idle = (LinkableSN)lnode.getProtocol(idle_protocol);
-		return idle.containsAsFriend(lnode, n);
+		LinkableSN idle = (LinkableSN)CommonState.getNode().getProtocol(idle_protocol);
+		return idle.containsAsFriend(n);
 	}
 
 	public void nextCycle(Node lnode, int protocolID)
@@ -522,7 +548,7 @@ public class NewscastED implements EDProtocol, CDProtocol, LinkableSN
 			return;
 		}
 		Transport tr = (Transport) lnode.getProtocol(c.tid);
-		NewscastMessage messsage = new NewscastMessage(lnode, true, getFriends(lnode));
+		NewscastMessage messsage = new NewscastMessage(lnode, true, getFriends(lnode, lnode));
 		tr.send(lnode, peerNode, messsage, protocolID);
 	}
 

@@ -5,7 +5,6 @@ import peersim.core.Node;
 
 public abstract class News implements Comparable<News>
 {
-	
 	private int eventTime = 0;
 	private Node node;
 	

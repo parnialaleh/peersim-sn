@@ -6,12 +6,13 @@ import java.util.List;
 
 import example.sn.newscast.LinkableSN;
 import example.sn.newscast.NodeEntry;
+import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.core.Protocol;
 
-public class IdleProtocolSN implements Protocol, LinkableSN
+public class IdleProtocolSN extends LinkableSN implements Protocol
 {
 	private static final int DEFAULT_INITIAL_CAPACITY = 10;
 	private static final String PAR_INITCAP = "capacity";
@@ -71,19 +72,16 @@ public class IdleProtocolSN implements Protocol, LinkableSN
 
 	public Node getNeighbor(int index)
 	{
-//		System.err.println(index + " " + len);
 		int tmp = len;
 		if (index >= len)
 			for (int i = 0; i < neighbors.length && neighbors[i] != null; i++){
 				int tmp2 = tmp;
 				tmp += ((IdleProtocolSN)neighbors[i].n.getProtocol(pid)).localDegree();
 				if (tmp > index){
-//					System.err.println("ECCOMI " + tmp + " " + index + " " + tmp2);
 					return ((IdleProtocolSN)neighbors[i].n.getProtocol(pid)).getNeighbor((index - tmp2));
 				}
 			}
 		else{
-//			System.err.println("ECCOMI FINALE");
 			return neighbors[index].n;
 		}
 
@@ -139,7 +137,7 @@ public class IdleProtocolSN implements Protocol, LinkableSN
 		len = 0;
 	}
 
-	public boolean containsAsFriend(Node lnode, Node n)
+	public boolean containsAsFriend(Node n)
 	{
 		for (int i = 0; i < len && neighbors[i] != null; i++) {
 			if ((neighbors[i].n == n) && (neighbors[i].type == FRIEND))
@@ -148,7 +146,7 @@ public class IdleProtocolSN implements Protocol, LinkableSN
 		return false;
 	}
 
-	public Node getFriendPeer(Node lnode)
+	public Node getFriendPeer(Node lnode, Node n)
 	{
 		final int d = localDegree();
 		if (d == 0)
@@ -167,21 +165,26 @@ public class IdleProtocolSN implements Protocol, LinkableSN
 		for (int i = index - 1; i >= 0; --i)
 			if ((neighbors[i].n.isUp()) && (neighbors[i].type == FRIEND))
 				return neighbors[i].n;
-		
+
 		return null;
 	}
 
-	public NodeEntry[] getFriends(Node n)
+	public NodeEntry[] getFriends(Node lnode, Node n)
 	{
-		List<NodeEntry> friends = new ArrayList<NodeEntry>();
+		if (lnode.equals(n))
+			return getFriends(neighbors);
+		else
+			for (int j = 0; j < neighbors.length && neighbors[j] != null; j++)
+				if (neighbors[j].n.equals(n))
+					return getFriends(((IdleProtocolSN)neighbors[j].n.getProtocol(pid)).neighbors);
 
-		for (int i = 0; i < neighbors.length && neighbors[i] != null; i++){
-			NodeEntry ne = neighbors[i];
-			if (ne.type == FRIEND) 
-				friends.add(ne);
-		}
-
-		return friends.toArray(new NodeEntry[0]);
+		System.err.println(((SNNode)lnode).getRealID() + " Not Found " + ((SNNode)n).getRealID());
+		return new NodeEntry[0];
+	}
+	
+	public Node getPeer(Node node)
+	{
+		return null;
 	}
 
 }
