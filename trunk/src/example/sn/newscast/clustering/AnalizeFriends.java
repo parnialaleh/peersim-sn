@@ -100,6 +100,28 @@ public class AnalizeFriends extends ConnectivityObserver
 
 		createGraph(pidNcast, nodeList);
 		createGraph(pidIdle, nodeList);
+		/*for (i = 0; i < node.length; ++i) {
+			tmp = node[i];
+			n[i] = i;
+			linkable = (LinkableSN) tmp.getProtocol(pidNcast);
+			nDegree = linkable.degree();
+			for (j = 0; j < nDegree; ++j){
+				nd = (SNNode)linkable.getNeighbor(j);
+				if (((SNNode)nd).isUp()){
+					ug.addEdge(i, nodeList.indexOf(nd));
+				}
+			}
+			
+			linkable = (LinkableSN) tmp.getProtocol(pidIdle);
+			nDegree = linkable.degree();
+			for (j = 0; j < nDegree; ++j){
+				nd = (SNNode)linkable.getNeighbor(j);
+				System.out.println(nd.getID() + " " + nodeList.indexOf(nd));
+				if (((SNNode)nd).isUp()){
+					ug.addEdge(i, nodeList.indexOf(nd));
+				}
+			}
+		}*/
 	}
 
 	private List<List<Node>> treeVisit() {
@@ -124,6 +146,10 @@ public class AnalizeFriends extends ConnectivityObserver
 			else
 				hm.put(pos, new Integer(v.intValue() + 1));
 		}
+//		Iterator<Integer> it = hm.values().iterator();
+//		while (it.hasNext()) {
+//			System.out.println();
+//		}
 		
 		return cluster;
 	}
@@ -171,18 +197,23 @@ public class AnalizeFriends extends ConnectivityObserver
 		}
 	}
 	// ------------------------------------------
-	
+
 	public List<List<Node>> analize()
 	{
 		// inizializzazione grafo della rete
+		System.out.println("INIT");
 		graphInit();
 		// esecuzione dfs
+		System.out.println("DFS");
 		dfs();
 		// ordinamento in ordine decrescente di ft
+		System.out.println("SORT");
 		sort(0, nodes - 1);
 		// esecuzione dfs su G' (grafo trasposto)
+		System.out.println("DFST");
 		dfsT();
 		// visita dell'albero generato dall'ultima dfs
+		System.out.println("VISTI");
 		return treeVisit();
 	}
 
