@@ -3,8 +3,6 @@ package example.sn.newscast;
 import java.util.ArrayList;
 import java.util.List;
 
-import example.sn.idle.IdleProtocolSN;
-import example.sn.newscast.clustering.AnalizeFriends;
 import example.sn.node.SNNode;
 
 import peersim.cdsim.CDProtocol;
@@ -267,10 +265,10 @@ public class NewscastED extends LinkableSN implements EDProtocol, CDProtocol
 
 		int i = CommonState.r.nextInt(nodesEntry.length + nodesEntryIdle.length);
 
-		if (((SNNode)lnode).getRealID() == 1455300416)
+//		if (((SNNode)lnode).getRealID() == 1455300416)
 			//System.err.println(nodesEntry.length + " " + nodesEntryIdle.length + " " + ((SNNode)lnode).getRealID() + " " + ((SNNode)n).getRealID());
-			System.err.println((i < nodesEntry.length)? ((SNNode)nodesEntry[i].n).getRealID() : ((SNNode)nodesEntryIdle[i - nodesEntry.length].n).getRealID() + " XXXX");
-		
+//			System.err.println((i < nodesEntry.length)? ((SNNode)nodesEntry[i].n).getRealID() : ((SNNode)nodesEntryIdle[i - nodesEntry.length].n).getRealID() + " XXXX");
+
 		return (i < nodesEntry.length)? nodesEntry[i].n : nodesEntryIdle[i - nodesEntry.length].n;		
 	}
 
@@ -426,7 +424,7 @@ public class NewscastED extends LinkableSN implements EDProtocol, CDProtocol
 			tr.send(lnode, message.getSender(), messsage, thisPid);
 		}
 
-		int type = containsAsFriend(message.getSender())? FRIEND : FRIEND_FRIEND;
+		int type = containsAsFriend(lnode, message.getSender())? FRIEND : FRIEND_FRIEND;
 
 		List<NodeEntry> rnodeCache = new ArrayList<NodeEntry>(); 
 
@@ -439,7 +437,7 @@ public class NewscastED extends LinkableSN implements EDProtocol, CDProtocol
 		if (rnodeCache.size() > 0){
 			merge(lnode, rnodeCache.toArray(new NodeEntry[0]), message.getSender());
 			for (int k = 1; k < NewscastED.tn.length && NewscastED.tn[k] != null; k++)
-				NewscastED.tn[k].type = containsAsFriend(NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
+				NewscastED.tn[k].type = containsAsFriend(lnode, NewscastED.tn[k].n)? FRIEND : FRIEND_FRIEND;
 		}
 
 		if (contains(message.getSender())){
@@ -529,15 +527,19 @@ public class NewscastED extends LinkableSN implements EDProtocol, CDProtocol
 		return sb.toString();
 	}
 
-	public boolean containsAsFriend(Node n)
-	{
+	public boolean containsAsFriend(Node lnode, Node n)
+	{		
 		for (int i = 0; i < cache.length && cache[i] != null; i++) {
 			if ((cache[i].n.getID() == n.getID()) && (cache[i].type == FRIEND))
 				return true;
 		}
 
-		LinkableSN idle = (LinkableSN)CommonState.getNode().getProtocol(idle_protocol);
-		return idle.containsAsFriend(n);
+		LinkableSN idle = (LinkableSN)lnode.getProtocol(idle_protocol);
+		if (idle.containsAsFriend(lnode, n))
+			return true;
+		
+		
+		return false;
 	}
 
 	public void nextCycle(Node lnode, int protocolID)

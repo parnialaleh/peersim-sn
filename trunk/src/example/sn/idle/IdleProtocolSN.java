@@ -1,9 +1,5 @@
 package example.sn.idle;
 
-
-import java.util.ArrayList;
-import java.util.List;
-
 import example.sn.newscast.LinkableSN;
 import example.sn.newscast.NodeEntry;
 import example.sn.node.SNNode;
@@ -137,10 +133,10 @@ public class IdleProtocolSN extends LinkableSN implements Protocol
 		len = 0;
 	}
 
-	public boolean containsAsFriend(Node n)
+	public boolean containsAsFriend(Node lnode, Node n)
 	{
 		for (int i = 0; i < len && neighbors[i] != null; i++) {
-			if ((neighbors[i].n == n) && (neighbors[i].type == FRIEND))
+			if ((neighbors[i].n.getID() == n.getID()) && (neighbors[i].type == FRIEND))
 				return true;
 		}
 		return false;
