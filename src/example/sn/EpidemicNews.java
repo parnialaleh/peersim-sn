@@ -25,6 +25,8 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	protected final boolean hash_message;
 
 	private boolean infected = false;
+	
+	private long lastSelectedPeer = Long.MIN_VALUE;
 
 	public EpidemicNews(String n)
 	{
@@ -42,14 +44,15 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 			ev = (EpidemicNews)super.clone();
 		} catch (CloneNotSupportedException e) {}
 		ev.infected = true;
+		ev.lastSelectedPeer = Long.MIN_VALUE;
 		return ev;	
 	}
 
 	public void merge(Node lnode, Node rnode, Message msg) {
 		boolean res = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
 
-		//		if (res)
-		//			System.out.println(lnode.getID() + "->" + rnode.getID() + " " + ((SNNode)lnode).getRealID() + "->" + ((SNNode)rnode).getRealID() + " " + res);
+//		if (res)
+//			System.out.println(lnode.getID() + "->" + rnode.getID() + " " + ((SNNode)lnode).getRealID() + "->" + ((SNNode)rnode).getRealID() + " " + res);
 
 		infected =  res || infected;
 	}
@@ -85,9 +88,10 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 			n = list.get(CommonState.r.nextInt(list.size())).getNode();
 
 		Node peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
-		if (((SNNode)peer).getRealID() == 1567804503)
-			System.err.println(((SNNode)lnode).getRealID() + " " + ((SNNode)n).getRealID() + " " + list.size() + " PPIPP");
 
+		while (peer.getID() == lastSelectedPeer)
+			peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
+		
 		return peer;
 	}
 
@@ -99,7 +103,6 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	public void setInfected(boolean infected)
 	{
 		this.infected = infected;
-
 	}
 
 }

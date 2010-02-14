@@ -5,7 +5,6 @@ import java.util.List;
 import example.sn.NewsManager;
 import example.sn.epidemic.message.News;
 import example.sn.newscast.LinkableSN;
-import example.sn.newscast.NewscastED;
 import example.sn.newscast.NodeEntry;
 import example.sn.node.SNNode;
 
@@ -20,15 +19,19 @@ public class DisseminationObserver implements Control
 {
 	private static final String PAR_PROTOCOL_NEWS = "protocol.news";
 	private static final String PAR_PROTOCOL_NEWSCAST = "protocol.newscast";
+	private static final String PAR_PROTOCOL_IDLE = "protocol.idle";
 
+	
 	private final int pidNews;
 	private final int pidNewscast;
+	private final int pidIdle;
 	private final String name;
 
 	public DisseminationObserver(String n)
 	{
 		this.pidNews = Configuration.getPid(n + "." + PAR_PROTOCOL_NEWS);
 		this.pidNewscast = Configuration.getPid(n + "." + PAR_PROTOCOL_NEWSCAST);
+		this.pidIdle = Configuration.getPid(n + "." + PAR_PROTOCOL_IDLE);
 		this.name = n;
 	}
 
@@ -38,6 +41,7 @@ public class DisseminationObserver implements Control
 		List<News> news = null;
 		Node n = null;
 		LinkableSN ncast = null;
+		LinkableSN idle = null;
 		NodeEntry[] friends = null;
 		int know = 0;
 		int friendsNo = 0;
@@ -50,20 +54,30 @@ public class DisseminationObserver implements Control
 			news = ((NewsManager)n.getProtocol(pidNews)).getOwnNews(n);
 
 			ncast = (LinkableSN)n.getProtocol(pidNewscast);
-
-			//Friend list
-			friends = ncast.getFriends(n, n);
+			idle = (LinkableSN)n.getProtocol(pidIdle);			
 
 			for (News nw : news){
 				know = 0;
 				friendsNo = 0;
+				
+				//Friend list
+				friends = ncast.getFriends(n, n);
 				for (NodeEntry ne : friends)
 					if (ne.n.isUp()){
 						if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw))
 							know++;
 						friendsNo++;
 					}
-				System.out.println(n.getID() + " " + ((SNNode)n).getRealID() + " " + " " + friendsNo + " " + know + " " + friends.length);
+				
+				friends = idle.getFriends(n, n);
+				for (NodeEntry ne : friends)
+					if (ne.n.isUp()){
+						if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw))
+							know++;
+						friendsNo++;
+					}
+				
+				System.out.println(CommonState.getTime() + " " + name + ": " + n.getID() + " " + ((SNNode)n).getRealID() + " " + " " + friendsNo + " " + know);
 				stats.add((double)know / (double)friendsNo);
 			}
 		}

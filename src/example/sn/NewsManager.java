@@ -13,7 +13,6 @@ import example.sn.epidemic.message.News;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.newscast.LinkableSN;
 import example.sn.newscast.NewscastED;
-import example.sn.node.SNNode;
 
 /**
  * Class to manage all news.
@@ -80,10 +79,12 @@ public class NewsManager implements EDProtocol
 	{
 		List<News> list = new ArrayList<News>();
 		
+//		System.err.println(((SNNode)lnode).getRealID() + " " + ((SNNode)rnode).getRealID());
+		
 		for (News n: news)
-			if (((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(rnode) || ((LinkableSN)n.getNode().getProtocol(pidIdle)).containsAsFriend(rnode))
+			if (((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode(), rnode))// || ((LinkableSN)n.getNode().getProtocol(pidIdle)).containsAsFriend(n.getNode(), rnode)){
 				list.add(n);
-			/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
+				/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
 				list.add(n);*/
 		
 //		if (((SNNode)lnode).getRealID() == 1455300416)
@@ -123,8 +124,6 @@ public class NewsManager implements EDProtocol
 			}
 
 		Collections.sort(this.news);
-//		if (addSomething)
-//			System.err.println("Merge " + addSomething);
 		return addSomething;
 	}
 

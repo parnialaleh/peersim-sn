@@ -17,7 +17,7 @@ public abstract class LinkableSN implements Linkable
 	 * @param n Note to search
 	 * @return true if n is found and is a friend, false otherwise
 	 */
-	public abstract boolean containsAsFriend(Node n);
+	public abstract boolean containsAsFriend(Node lnode, Node n);
 	
 	/**
 	 * 
