@@ -77,12 +77,12 @@ public class DisseminationObserver implements Control
 						friendsNo++;
 					}
 				
-				System.out.println(CommonState.getTime() + " " + name + ": " + n.getID() + " " + ((SNNode)n).getRealID() + " " + " " + friendsNo + " " + know);
+				System.out.println(CommonState.getTime() + " " + name + ": " + n.getID() + " " + ((SNNode)n).getRealID() + " " + " " + friendsNo + " " + know + " " + ((double)know/(double)friendsNo));
 				stats.add((double)know / (double)friendsNo);
 			}
 		}
 
-		System.out.println(CommonState.getTime() + " " + name + ": " + stats);
+		//System.out.println(CommonState.getTime() + " " + name + ": " + stats);
 
 		return false;
 	}
