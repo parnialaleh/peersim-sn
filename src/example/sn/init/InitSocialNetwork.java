@@ -7,13 +7,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import example.sn.epidemic.control.AddNews;
 import example.sn.node.SNNode;
 
 import peersim.config.Configuration;
@@ -26,20 +29,23 @@ import peersim.core.Node;
 public class InitSocialNetwork implements Control
 {
 	private static final String PAR_LINKABLE = "linkable";
-	private static final String PAR_FILE = "file";
-	private static final String PAR_FILE_ID = "idFile";
+	private static final String PAR_DIRECTORY = "directory";
+	private static final String PAR_FILE_BEGIN = "fileBegin";
+	private static final String PAR_FILE_NO = "fileNo";
 	private static final String PAR_XML = "xml";
 
 	private final int pid;
-	private final String fileName;
-	private final String idFileName;
+	private final String directoryName;
+	private final String fileBegin;
+	private final int fileNo;
 	private final boolean isXml;
 
 	public InitSocialNetwork(String n)
 	{
 		this.pid = Configuration.getPid(n + "." + PAR_LINKABLE);
-		this.fileName = Configuration.getString(n + "." + PAR_FILE);
-		this.idFileName = Configuration.getString(n + "." + PAR_FILE_ID);
+		this.directoryName = Configuration.getString(n + "." + PAR_DIRECTORY);
+		this.fileBegin = Configuration.getString(n + "." + PAR_FILE_BEGIN);
+		this.fileNo = Configuration.getInt(n + "." + PAR_FILE_NO);
 		this.isXml = Configuration.contains(n + "." + PAR_XML);
 	}
 
@@ -48,7 +54,7 @@ public class InitSocialNetwork implements Control
 		List<String> nodes = new ArrayList<String>();
 		try {
 			DOMParser parser = new DOMParser();
-			parser.parse(fileName);
+			parser.parse(directoryName);
 			Document doc = parser.getDocument();
 
 			NodeList nodelist = doc.getElementsByTagName("node");
@@ -108,26 +114,37 @@ public class InitSocialNetwork implements Control
 	{
 		if (isXml)
 			parseXML();
-
-		String line;
-		String tmp[] = null;
-		int source = 0;
-		int friend = 0;
-		
-		List<Long> ids = new ArrayList<Long>();
 		
 		try {
-			BufferedReader d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(idFileName))))));
+			String line;
+			String tmp[] = null;
+			int source = 0;
+			int friend = 0;
+			
+			Set<Long> idsSet = new HashSet<Long>();
+			List<Long> ids = new ArrayList<Long>();
+			
+			BufferedReader d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(directoryName + fileBegin + "" + fileNo))))));
 			while ((line = d.readLine()) != null){
-				ids.add(Long.parseLong(line));
+				tmp = line.split(" ");
+				idsSet.add(Long.parseLong(tmp[0]));
+				idsSet.add(Long.parseLong(tmp[1]));
 			}
 			d.close();
 			
+			for (Long l : idsSet.toArray(new Long[0]))
+				ids.add(l);
+			
 			adjustNetworkSize(ids.size());
 
-			d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(fileName))))));
+			boolean rootSetted = false;
+			d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(directoryName + fileBegin + "" + fileNo))))));
 			while ((line = d.readLine()) != null){
-				tmp = line.split(" ");				
+				tmp = line.split(" ");
+				if (!rootSetted){
+					AddNews.setRoot(Long.parseLong(tmp[0]));
+					rootSetted = true;
+				}
 				source = ids.indexOf(Long.parseLong(tmp[0]));
 				friend = ids.indexOf(Long.parseLong(tmp[1]));
 				((SNNode)Network.get(source)).setRealID(Long.parseLong(tmp[0]));

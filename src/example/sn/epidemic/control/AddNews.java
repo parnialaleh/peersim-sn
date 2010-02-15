@@ -23,7 +23,7 @@ public class AddNews implements Control
 	private static final String PAR_STATUS_CHANGE = "statusChangeNo";
 	private static final String PAR_START_PROTOCOL = "starttime";
 	private static final String PAR_END_PROTOCOL = "endtime";
-	private static final String PAR_ROOT = "root";
+	//private static final String PAR_ROOT = "root";
 
 	private final int pidNewsManager;
 	private final int pidIdle;
@@ -32,7 +32,7 @@ public class AddNews implements Control
 	private final int statusChangeNo;
 	private final long startTime;
 	private final long endTime;
-	private final long root;
+	private static long root;
 
 	public AddNews(String n)
 	{
@@ -43,7 +43,7 @@ public class AddNews implements Control
 		this.statusChangeNo = Configuration.getInt(n + "." + PAR_STATUS_CHANGE);
 		this.startTime = Configuration.getLong(n + "." + PAR_START_PROTOCOL, Long.MIN_VALUE);
 		this.endTime = Configuration.getLong(n + "." + PAR_END_PROTOCOL, Long.MAX_VALUE);
-		this.root = Configuration.getLong(n + "." + PAR_ROOT);
+		//this.root = Configuration.getLong(n + "." + PAR_ROOT);
 	}
 	
 	private int indexOf(long nodeRealID)
@@ -95,6 +95,14 @@ public class AddNews implements Control
 		}
 
 		return false;
+	}
+	
+	public static long getRoot() {
+		return root;
+	}
+
+	public static void setRoot(long root) {
+		AddNews.root = root;
 	}
 
 }
