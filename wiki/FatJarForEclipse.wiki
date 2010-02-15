@@ -1,0 +1,6 @@
+#summary Installation Instruction for FatJar
+
+= Installation Instructions =
+  * Download the zip from [http://fjep.sourceforge.net/]
+  * Unzip it within Eclipse workplace directory
+  * Restart the IDE with _eclipse -clean_ command
