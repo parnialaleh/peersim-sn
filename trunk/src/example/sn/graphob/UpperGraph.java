@@ -47,7 +47,8 @@ public class UpperGraph
 			return;
 		
 		ArrayList<Long> tmp = graph.get(i);
-		if (tmp.indexOf(new Long(j)) >= 0)
+		ArrayList<Long> tmp2 = graph.get(j);
+		if ((tmp.indexOf(new Long(j)) >= 0) || (tmp2.indexOf(new Long(i)) >= 0))
 			return;
 
 		tmp.add(new Long(j));
