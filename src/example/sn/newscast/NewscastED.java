@@ -278,7 +278,7 @@ public class NewscastED extends LinkableSN implements EDProtocol, CDProtocol
 
 		final int d = idle.degree();
 		final int d1 = degree();
-
+		
 		if (CommonState.r.nextInt(d + d1) < d1){
 			Node n = getPeer();
 			if (n != null)

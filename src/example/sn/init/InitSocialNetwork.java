@@ -86,7 +86,7 @@ public class InitSocialNetwork implements Control
 					Element e = (Element)n;
 					String src = e.getAttribute("source").split("n")[1];
 					String dest = e.getAttribute("target").split("n")[1];
-
+					
 					((Linkable)Network.get(nodes.indexOf(src)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(dest)));
 					((Linkable)Network.get(nodes.indexOf(dest)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(src)));
 				}

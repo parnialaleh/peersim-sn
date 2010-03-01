@@ -11,8 +11,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import peersim.reports.DegreeStats;
-
 import example.sn.graphob.UpperGraph;
 
 public class CreateFriendFile
