@@ -7,6 +7,15 @@ public class NodeEntry implements Comparable<NodeEntry>, Cloneable
 	public Node n = null;
 	public int ts = -1;
 	public int type = 0;
+	
+	public NodeEntry(){}
+	
+	public NodeEntry(Node n, int ts, int type)
+	{
+		this.n = n;
+		this.ts = ts;
+		this.type = type;
+	}
 
 	@Override
 	public boolean equals(Object obj)
