@@ -180,7 +180,17 @@ public class IdleProtocolSN extends LinkableSN implements Protocol
 	
 	public Node getPeer(Node node)
 	{
-		return null;
+		return neighbors[CommonState.r.nextInt(len)].n;
+	}
+
+	@Override
+	public Node[] getNodes(Node node)
+	{
+		Node[] nodes = new Node[this.neighbors.length];
+		for (int i = 0; i < nodes.length; i++)
+			nodes[i] = this.neighbors[i].n;
+		
+		return nodes;
 	}
 
 }
