@@ -22,7 +22,7 @@ import example.sn.newscast.LinkableSN;
  *
  * This is the base class for all gossiping protocols
  */
-public abstract class Gossip extends LinkableSN implements EDProtocol, CDProtocol, Linkable
+public abstract class Gossip extends LinkableSN implements EDProtocol, CDProtocol
 {
   /**
    * This variable holds all protocol-instance related variable,
