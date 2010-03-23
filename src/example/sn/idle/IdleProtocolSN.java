@@ -68,7 +68,7 @@ public class IdleProtocolSN extends LinkableSN implements Protocol
 
 	public Node getNeighbor(int index)
 	{
-		int tmp = len;
+		/*int tmp = len;
 		if (index >= len)
 			for (int i = 0; i < neighbors.length && neighbors[i] != null; i++){
 				int tmp2 = tmp;
@@ -79,9 +79,9 @@ public class IdleProtocolSN extends LinkableSN implements Protocol
 			}
 		else{
 			return neighbors[index].n;
-		}
-
-		return null;
+		}*/
+		
+		return neighbors[index].n;
 	}
 
 	// --------------------------------------------------------------------------
