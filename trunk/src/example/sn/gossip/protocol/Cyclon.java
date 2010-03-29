@@ -77,12 +77,12 @@ public class Cyclon extends Gossip
 			// which should obviously be excluded.
 			if (!item.equals(destItem))
 			{
-				if (((LinkableSN)((ItemSim)destItem).node.getProtocol(idleProtocol)).containsAsFriend(((ItemSim)destItem).node, item.node)){
+				//if (((LinkableSN)((ItemSim)destItem).node.getProtocol(idleProtocol)).containsAsFriend(((ItemSim)destItem).node, item.node)){
 					items.remove(i--);
 					itemsToSend.add(item);
 					if (--howmany==0)
 						break;
-				}
+				
 			}
 		}
 
