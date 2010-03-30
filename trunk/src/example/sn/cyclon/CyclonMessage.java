@@ -1,4 +1,4 @@
-package example.cyclon;
+package example.sn.cyclon;
 
 import java.util.List;
 

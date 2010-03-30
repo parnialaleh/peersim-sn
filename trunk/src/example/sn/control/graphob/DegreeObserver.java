@@ -1,6 +1,6 @@
-package example.sn.graphob;
+package example.sn.control.graphob;
 
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;

@@ -15,7 +15,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import example.sn.gossip.item.Item;
 import example.sn.gossip.item.ItemSim;
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
 
 /**
  * @author Spyros Voulgaris

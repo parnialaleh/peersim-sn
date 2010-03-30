@@ -1,7 +1,9 @@
-package example.sn.newscast;
+package example.sn.linkable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import example.sn.newscast.NodeEntry;
 
 import peersim.core.Linkable;
 import peersim.core.Node;

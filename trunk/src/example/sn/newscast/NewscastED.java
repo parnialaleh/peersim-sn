@@ -3,6 +3,8 @@ package example.sn.newscast;
 import java.util.ArrayList;
 import java.util.List;
 
+import example.sn.linkable.LinkableSN;
+
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
