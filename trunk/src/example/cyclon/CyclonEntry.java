@@ -2,6 +2,7 @@ package example.cyclon;
 
 import java.util.Comparator;
 
+import peersim.core.CommonState;
 import peersim.core.Node;
 
 public class CyclonEntry implements Comparable<CyclonEntry>, Comparator<CyclonEntry>
@@ -11,9 +12,19 @@ public class CyclonEntry implements Comparable<CyclonEntry>, Comparator<CyclonEn
 	public boolean removed;
 	public long timeRemoved;
 	public Node nodeSended;
+	public boolean selectedAtRequest;
 
 	public CyclonEntry(){}
 
+	public CyclonEntry(CyclonEntry ce)
+	{
+		this.n = ce.n;
+		this.age = ce.age;
+		this.removed = false;
+		this.timeRemoved = Long.MAX_VALUE;
+		this.nodeSended = null;	
+	}
+	
 	public CyclonEntry(Node n, long age)
 	{
 		this.n = n;
@@ -44,5 +55,21 @@ public class CyclonEntry implements Comparable<CyclonEntry>, Comparator<CyclonEn
 	public void increase()
 	{
 		this.age++;
+	}
+	
+	public void removeNode(Node nodeSended, boolean selectedAtRequest)
+	{
+		this.removed = true;
+		this.nodeSended = nodeSended;
+		this.timeRemoved = CommonState.getTime();
+		this.selectedAtRequest = selectedAtRequest;
+	}
+	
+	public void reuseNode()
+	{
+		this.removed = false;
+		this.nodeSended = null;
+		this.timeRemoved = Long.MAX_VALUE;
+		this.selectedAtRequest = false;
 	}
 }
