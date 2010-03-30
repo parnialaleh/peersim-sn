@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import example.sn.gossip.protocol.Cyclon;
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
 
 import peersim.config.Configuration;
 import peersim.core.Control;

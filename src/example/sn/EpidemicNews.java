@@ -1,6 +1,8 @@
 package example.sn;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -13,20 +15,24 @@ import peersim.extras.am.epidemic.bcast.Infectable;
 import example.sn.epidemic.message.EpidemicHashMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
 import example.sn.epidemic.message.News;
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
+import example.sn.linkable.clustering.AnalizeFriends;
+import example.sn.node.SNNode;
 
 public class EpidemicNews implements EpidemicProtocol, Infectable
 {	
-	private static final String PAR_NETWORK_MANAGER = "protocol.network_manager";
+	private static final String PAR_GOSSIP = "protocol.gossip";
+	private static final String PAR_IDLE = "protocol.idle";
 	private static final String PAR_NEWS_MANAGER = "protocol.news_manager";
 	private static final String PAR_HASH_MESSAGE = "hash";
 
-	protected final int pidNetworkManger;
+	protected final int pidGossip;
+	protected final int pidIdle;
 	protected final int pidNewsManger;
 	protected final boolean hash_message;
 
 	private boolean infected = false;
-	
+
 	private long lastSelectedPeer = Long.MIN_VALUE;
 
 	public EpidemicNews(String n)
@@ -34,7 +40,8 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 		this.infected = true;
 
 		this.pidNewsManger = Configuration.getPid(n + "." + PAR_NEWS_MANAGER);
-		this.pidNetworkManger = Configuration.getPid(n + "." + PAR_NETWORK_MANAGER);
+		this.pidGossip = Configuration.getPid(n + "." + PAR_GOSSIP);
+		this.pidIdle = Configuration.getPid(n + "." + PAR_IDLE);
 		this.hash_message = Configuration.getBoolean(n + "." + PAR_HASH_MESSAGE, true);
 	}
 
@@ -51,7 +58,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public void merge(Node lnode, Node rnode, Message msg) {
 		boolean res = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
-		
+
 		infected =  res || infected;
 	}
 
@@ -74,13 +81,22 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode), (request instanceof EpidemicHashMessage));
 	}
-	
+
 	private boolean isInList(Node n, List<News> list)
 	{
 		for (News nw : list)
 			if (nw.getNode().equals(n))
 				return true;
 		return false;
+	}
+
+	private int findLastSelectedCluster(List<List<Node>> cluster, long lastSelectedPeer)
+	{
+		for (int i = 0; i < cluster.size(); i++)
+			for (Node n : cluster.get(i))
+				if (n.getID() == lastSelectedPeer)
+					return i;
+		return -1;
 	}
 
 	public Node selectPeer(Node lnode)
@@ -95,38 +111,41 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 		if (n == null)
 			return null;
-		
+
 		Node peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
 
 		while (peer.getID() == lastSelectedPeer)
 			peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
-		
-		return peer;*/
-		
-		Node[] nodeList = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getNodes(lnode);
-		
-		//shuffle the list
-		Arrays.sort(nodeList, new Comparator<Node>() {
-			public int compare(Node o1, Node o2) {
-				return CommonState.r.nextInt(3)-1;
-			}
-		});
-		
-		try{
-		for (Node n : nodeList)
-			if (isInList(n, list)){
-				Node peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
 
-				while (peer.getID() == lastSelectedPeer)
-					peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
-				
+		return peer;*/
+
+		AnalizeFriends af = new AnalizeFriends(pidGossip, pidIdle, (SNNode)lnode);
+		List<List<Node>> cluster = af.analize();
+		Collections.shuffle(cluster, CommonState.r);
+		for (List<Node> lst : cluster)
+			Collections.shuffle(lst, CommonState.r);			
+
+		int lastSelectedCluster = findLastSelectedCluster(cluster, lastSelectedPeer);
+		for (int i = 0; i < cluster.size(); i++)
+			if (i != lastSelectedCluster){
+				for (Node n : cluster.get(i))
+					if (isInList(n, list)){
+						Node peer = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, n);
+						lastSelectedPeer = peer.getID();
+						return peer;
+					}
+			}
+		
+		//Nothing found in other clusters
+		for (Node n : cluster.get(lastSelectedCluster))
+			if (isInList(n, list)){
+				Node peer = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, n);
+				lastSelectedPeer = peer.getID();
 				return peer;
 			}
-		} catch (Exception e){
-			return ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getPeer(lnode);
-		}
-		
-		return null;
+
+		//No messages
+		return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
 	}
 
 	public boolean isInfected()

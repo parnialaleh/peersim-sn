@@ -11,7 +11,7 @@ import peersim.edsim.EDProtocol;
 
 import example.sn.epidemic.message.News;
 import example.sn.epidemic.message.NewsFriendship;
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
 import example.sn.newscast.NewscastED;
 
 /**

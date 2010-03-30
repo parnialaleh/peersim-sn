@@ -1,9 +1,12 @@
-package example.cyclon;
+package example.sn.cyclon;
 
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import example.sn.linkable.LinkableSN;
+import example.sn.newscast.NodeEntry;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
@@ -13,23 +16,26 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
-public class Cyclon implements Linkable, EDProtocol, CDProtocol
+public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 {
 	private static final String PAR_CACHE = "cache";
 	private static final String PAR_L = "l";
 	private static final String PAR_TRANSPORT = "transport";
+	private static final String PAR_IDLE = "idle";
 
 	private final int size;
 	private final int l;
 	private final int tid;
+	private final int idle;
 
 	private List<CyclonEntry> cache = null;
 
-	public Cyclon(String n)
+	public CyclonSN(String n)
 	{
 		this.size = Configuration.getInt(n + "." + PAR_CACHE);
 		this.l = Configuration.getInt(n + "." + PAR_L);
 		this.tid = Configuration.getPid(n + "." + PAR_TRANSPORT);
+		this.idle = Configuration.getPid(n + "." + PAR_IDLE);
 
 		cache = new ArrayList<CyclonEntry>(size);
 	}
@@ -37,8 +43,8 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 	//-------------------------------------------------------------------
 	private void increaseAgeAndSort()
 	{
-		//for (CyclonEntry ce : cache)
-		//	ce.increase();
+		for (CyclonEntry ce : cache)
+			ce.increase();
 
 		Collections.sort(cache, new CyclonEntry());
 	}
@@ -52,43 +58,43 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		}
 	}
 
+	private List<CyclonEntry> initList(Node rnode)
+	{
+		Linkable idleProtocol = (Linkable)rnode.getProtocol(idle);
+
+		List<CyclonEntry> list = new ArrayList<CyclonEntry>();
+		for (CyclonEntry ce : cache)
+			if (idleProtocol.contains(ce.n))
+				list.add(ce);
+
+		return list;
+	}
+
+	/**
+	 * Send to rnode the list of nodes I know that are also
+	 * its friends
+	 * 
+	 * @param l
+	 * @param rnode
+	 * @return
+	 */
 	private List<CyclonEntry> selectNeighbors(int l, Node rnode)
 	{
 		int dim = Math.min(l, cache.size()-1);
-		List<CyclonEntry> list = new ArrayList<CyclonEntry>(l);
+		List<CyclonEntry> list = initList(rnode);
 
-		List<Integer> tmp = new ArrayList<Integer>();
+		while (list.size() > dim)
+			list.remove(CommonState.r.nextInt(list.size()));
+
+		/*List<Integer> tmp = new ArrayList<Integer>();
 		for (int i = 0; i < cache.size()-1; i++)
-			if (!cache.get(i).removed)
-				tmp.add(i);
-			else if ((CommonState.getTime() - cache.get(i).timeRemoved) >= 5000){
-				cache.get(i).removed = false;
-				cache.get(i).nodeSended = null;
-				cache.get(i).timeRemoved = Long.MAX_VALUE;
-				tmp.add(i);
-				System.out.println("QUI");
-			}
+			tmp.add(i);
 
-		int sup = Math.min(dim, tmp.size());
-		for (int i = 0; i < sup; i++){
-			CyclonEntry ce = cache.get((tmp.remove(CommonState.r.nextInt(tmp.size())).intValue()));
-			ce.removed = true;
-			ce.timeRemoved = CommonState.getTime();
-			ce.nodeSended = rnode;
+		for (int i = 0; i < dim; i++){
+			CyclonEntry ce = cache.get(tmp.remove(CommonState.r.nextInt(tmp.size())));
 			list.add(ce);
-		}
-//
-//		if (CommonState.getNode().getID() == 801){
-//			for (CyclonEntry ce : list)
-//				System.out.print(ce.n.getID() + " ");
-//			System.out.println();
-//			
-//			for (CyclonEntry ce1 : cache){
-//				System.err.print(ce1.n.getID() + " " + ce1.removed + " ");
-//			}
-//			System.err.println();
-//		}
-		
+		}*/
+
 		return list;
 	}
 
@@ -103,68 +109,29 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		return newList;
 	}
 
-	private int getFirstDeleted(Node rnode)
+	private int indexOf(CyclonEntry ce)
 	{
-		for (int i = cache.size()-1 ; i >= 0; i--)
-			if (cache.get(i).removed && cache.get(i).nodeSended.equals(rnode))
+		for (int i = 0; i < cache.size(); i++)
+			if (cache.get(i).n.equals(ce.n))
 				return i;
 
 		return -1;
 	}
 
-	private void insertReceivedItems(List<CyclonEntry> list, Node rnode)
+	private void insertReceivedItems(List<CyclonEntry> list, List<CyclonEntry> sentList)
 	{
 		for (CyclonEntry ce : list){
-			//firstly using empty cache slots
 			if (cache.size() < size)
 				cache.add(new CyclonEntry(ce.n, ce.age));
-			//secondly replacing entries among the ones sent to Q
 			else{
-				int index = getFirstDeleted(rnode);
-				if (index < 0){
-					System.err.println("PROBLEM " + CommonState.getNode().getID() + " " + cache.size() + " " + rnode.getID());
-					for (CyclonEntry ce1 : cache){
-						System.err.print(ce1.n.getID() + " " + ce1.removed + " ");
-					}
-					System.err.println();
+				int index = 0;
+				while (index < sentList.size() && indexOf(sentList.get(index)) < 0)
+					index++;
+				if (index >= sentList.size())
 					return;
-				}
-				//cache.set(indexOf(sentList.remove(index)), new CyclonEntry(ce.n, ce.age));
-				cache.set(index, new CyclonEntry(ce.n, ce.age));
+				cache.set(indexOf(sentList.remove(index)), new CyclonEntry(ce.n, ce.age));
 			}
 		}
-		
-
-//		if (CommonState.getNode().getID() == 801){
-//			for (CyclonEntry ce : list)
-//				System.out.print(ce.n.getID() + " ");
-//			System.out.println();
-			
-//			for (CyclonEntry ce1 : cache){
-//				System.err.print(ce1.n.getID() + " " + ce1.removed + " ");
-//			}
-//			System.err.println();
-//		}
-
-		for (CyclonEntry ce : cache){
-			if (ce.nodeSended != null && ce.nodeSended.equals(rnode)){
-				ce.nodeSended = null;
-				ce.removed = false;
-				ce.timeRemoved = Long.MAX_VALUE;
-			}
-		}
-		
-//		if (CommonState.getNode().getID() == 801){
-////			for (CyclonEntry ce : list)
-////				System.out.print(ce.n.getID() + " ");
-////			System.out.println();
-//			
-//			for (CyclonEntry ce1 : cache){
-//				System.err.print(ce1.n.getID() + " " + ce1.removed + " ");
-//			}
-//			System.err.println();
-//		}
-
 		/*//Add received items to the cache
 		insertItems(list);
 
@@ -186,8 +153,8 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 
 	public Object clone()
 	{
-		Cyclon cyclon = null;
-		try { cyclon = (Cyclon) super.clone(); }
+		CyclonSN cyclon = null;
+		try { cyclon = (CyclonSN) super.clone(); }
 		catch( CloneNotSupportedException e ) {} // never happens
 		cyclon.cache = new ArrayList<CyclonEntry>();
 
@@ -202,7 +169,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		if (cache.size() >= size)
 			return false;
 
-		CyclonEntry ce = new CyclonEntry(neighbour, CommonState.getTime());
+		CyclonEntry ce = new CyclonEntry(neighbour, 0);
 		cache.add(ce);
 
 		return true;
@@ -245,14 +212,9 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 			CyclonMessage msg = new CyclonMessage(node, nodesToSend, false, message.list);
 			Transport tr = (Transport) node.getProtocol(tid);
 			tr.send(node, message.node, msg, pid);
-			
-			if (CommonState.getNode().getID() == 801){
-				System.out.println("CONTACTED");
-			}
 		}
-		//else
-			//nodesToSend = message.sentList;
-
+		else
+			nodesToSend = message.sentList;
 
 		// 5. Discard entries pointing to P, and entries that are already in P’s cache.
 		List<CyclonEntry> list = discardEntries(node, message.list);
@@ -260,7 +222,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		// 6. Update P’s cache to include all remaining entries, by firstly using empty
 		//    cache slots (if any), and secondly replacing entries among the ones originally
 		//    sent to Q.
-		insertReceivedItems(list, message.node);
+		insertReceivedItems(list, nodesToSend);
 
 		// 1. Increase by one the age of all neighbors.
 		increaseAgeAndSort();
@@ -281,14 +243,46 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		List<CyclonEntry> nodesToSend = selectNeighbors(l-1, q);
 
 		// 3. Replace Q’s entry with a new entry of age 0 and with P’s address.
-		nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
+		nodesToSend.add(0, new CyclonEntry(node, 0));
 
 		// 4. Send the updated subset to peer Q.
 		CyclonMessage message = new CyclonMessage(node, nodesToSend, true, null);
 		Transport tr = (Transport) node.getProtocol(tid);
 		tr.send(node, q, message, protocolID);
-//		if (CommonState.getNode().getID() == 801){
-//			System.out.println("INITIATOR");
-//		}
+	}
+
+	@Override
+	public boolean containsAsFriend(Node lnode, Node n) {
+		LinkableSN linkable = (LinkableSN)lnode.getProtocol(idle);
+		return linkable.containsAsFriend(lnode, n);
+	}
+
+	@Override
+	public Node getFriendPeer(Node lnode, Node n)
+	{
+		LinkableSN linkable = (LinkableSN)lnode.getProtocol(idle);
+		return linkable.getFriendPeer(lnode, n);
+	}
+
+	@Override
+	public NodeEntry[] getFriends(Node lnode, Node n) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node[] getNodes(Node node) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node getPeer(Node node)
+	{
+		try{
+			return cache.get(CommonState.r.nextInt(cache.size())).n;
+		} catch (Exception e){
+			return null;
+		}
 	}
 }

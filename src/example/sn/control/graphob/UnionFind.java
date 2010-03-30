@@ -1,4 +1,4 @@
-package example.sn.graphob;
+package example.sn.control.graphob;
 
 public class UnionFind
 {

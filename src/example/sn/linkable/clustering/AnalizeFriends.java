@@ -1,4 +1,4 @@
-package example.sn.newscast.clustering;
+package example.sn.linkable.clustering;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,10 +8,10 @@ import java.util.Set;
 
 import peersim.core.CommonState;
 import peersim.core.Node;
-import example.sn.graphob.ConnectivityObserver;
-import example.sn.graphob.UnionFind;
-import example.sn.graphob.UpperGraph;
-import example.sn.newscast.LinkableSN;
+import example.sn.control.graphob.ConnectivityObserver;
+import example.sn.control.graphob.UnionFind;
+import example.sn.control.graphob.UpperGraph;
+import example.sn.linkable.LinkableSN;
 import example.sn.node.SNNode;
 
 public class AnalizeFriends extends ConnectivityObserver
@@ -19,9 +19,17 @@ public class AnalizeFriends extends ConnectivityObserver
 	private SNNode lnode = null;
 	protected SNNode[] node;
 
-	public AnalizeFriends(int pidNcast, int pidIdle, SNNode lnode)
+	/**
+	 * This class use pidIdle protocol to build the network
+	 * and pidGossip to return the list of known nodes
+	 * 
+	 * @param pidGossip pid of the gossip protocol
+	 * @param pidIdle pid of the idle protocol used only as "friend list storage"
+	 * @param lnode localNode
+	 */
+	public AnalizeFriends(int pidGossip, int pidIdle, SNNode lnode)
 	{
-		super(pidNcast, pidIdle);
+		super(pidGossip, pidIdle);
 		this.lnode = lnode;
 	}
 
@@ -71,9 +79,9 @@ public class AnalizeFriends extends ConnectivityObserver
 
 			for (j = 0; j < linkable2.degree(); j++){
 				nd2 = linkable2.getNeighbor(j);
-				if (((SNNode)nd2).isUp() && nd2.getID() != CommonState.getNode().getID()){
+				//if (((SNNode)nd2).isUp() && nd2.getID() != CommonState.getNode().getID()){
+				if (nd2.getID() != CommonState.getNode().getID())
 					ug.addEdge(nodeList.indexOf(nd), nodeList.indexOf(nd2));
-				}
 			}
 		}	
 	}
@@ -82,8 +90,8 @@ public class AnalizeFriends extends ConnectivityObserver
 	{
 		//create the list of nodes
 		Set<SNNode> nodesSet = new HashSet<SNNode>();
-		createNodeGraphList(pidNcast, nodesSet);
 		createNodeGraphList(pidIdle, nodesSet);
+		//createNodeGraphList(pidGossip, nodesSet);
 
 		List<SNNode> nodeList = new ArrayList<SNNode>();
 		for (SNNode n : nodesSet.toArray(new SNNode[0]))
@@ -98,30 +106,8 @@ public class AnalizeFriends extends ConnectivityObserver
 		ft = new int[nodes];
 		node = nodeList.toArray(new SNNode[0]);
 
-		createGraph(pidNcast, nodeList);
 		createGraph(pidIdle, nodeList);
-		/*for (i = 0; i < node.length; ++i) {
-			tmp = node[i];
-			n[i] = i;
-			linkable = (LinkableSN) tmp.getProtocol(pidNcast);
-			nDegree = linkable.degree();
-			for (j = 0; j < nDegree; ++j){
-				nd = (SNNode)linkable.getNeighbor(j);
-				if (((SNNode)nd).isUp()){
-					ug.addEdge(i, nodeList.indexOf(nd));
-				}
-			}
-			
-			linkable = (LinkableSN) tmp.getProtocol(pidIdle);
-			nDegree = linkable.degree();
-			for (j = 0; j < nDegree; ++j){
-				nd = (SNNode)linkable.getNeighbor(j);
-				System.out.println(nd.getID() + " " + nodeList.indexOf(nd));
-				if (((SNNode)nd).isUp()){
-					ug.addEdge(i, nodeList.indexOf(nd));
-				}
-			}
-		}*/
+		//createGraph(pidGossip, nodeList);
 	}
 
 	private List<List<Node>> treeVisit() {
@@ -146,10 +132,6 @@ public class AnalizeFriends extends ConnectivityObserver
 			else
 				hm.put(pos, new Integer(v.intValue() + 1));
 		}
-//		Iterator<Integer> it = hm.values().iterator();
-//		while (it.hasNext()) {
-//			System.out.println();
-//		}
 		
 		return cluster;
 	}
@@ -214,7 +196,7 @@ public class AnalizeFriends extends ConnectivityObserver
 		dfsT();
 		// visita dell'albero generato dall'ultima dfs
 		System.out.println("VISTI");
-		return treeVisit();
+		return treeVisit();		
 	}
 
 

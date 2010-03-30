@@ -6,6 +6,7 @@ import peersim.core.Control;
 import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
+import peersim.util.IncrementalStats;
 
 public class DegreeObserver implements Control
 {
@@ -31,9 +32,9 @@ public class DegreeObserver implements Control
 		if ((CommonState.getTime() >= endTime) || (CommonState.getTime() < startTime))
 			return false;
 		
-		Integer[] entry = new Integer[Network.size()];
+		int[] entry = new int[Network.size()];
 		for (int i = 0; i < Network.size(); i++){
-			entry[i] = new Integer(0);
+			entry[i] = 0;
 		}
 		
 		for (int i = 0; i < Network.size(); i++){
@@ -46,9 +47,14 @@ public class DegreeObserver implements Control
 			}
 		}
 		
+		IncrementalStats is = new IncrementalStats();
+		
 		for (int i = 0; i < Network.size(); i++){
 			System.out.println(CommonState.getTime() + " " + name + ": InDegree " + entry[i]);
+			is.add(entry[i]);
 		}
+		
+		//System.out.println(CommonState.getIntTime() + " " + name + ": size " + Network.size() + " " + is);
 		
 		return false;
 	}

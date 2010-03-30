@@ -1,4 +1,4 @@
-package example.sn.graphob;
+package example.sn.control.graphob;
 
 import java.util.ArrayList;
 import java.util.List;

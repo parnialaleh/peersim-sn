@@ -11,11 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import example.sn.epidemic.control.AddNews;
 import example.sn.node.SNNode;
 
@@ -32,13 +27,11 @@ public class InitSocialNetwork implements Control
 	private static final String PAR_DIRECTORY = "directory";
 	private static final String PAR_FILE_BEGIN = "fileBegin";
 	private static final String PAR_FILE_NO = "fileNo";
-	private static final String PAR_XML = "xml";
 
 	private final int pid;
 	private final String directoryName;
 	private final String fileBegin;
 	private final int fileNo;
-	private final boolean isXml;
 
 	public InitSocialNetwork(String n)
 	{
@@ -46,58 +39,6 @@ public class InitSocialNetwork implements Control
 		this.directoryName = Configuration.getString(n + "." + PAR_DIRECTORY);
 		this.fileBegin = Configuration.getString(n + "." + PAR_FILE_BEGIN);
 		this.fileNo = Configuration.getInt(n + "." + PAR_FILE_NO);
-		this.isXml = Configuration.contains(n + "." + PAR_XML);
-	}
-
-	private boolean parseXML()
-	{
-		List<String> nodes = new ArrayList<String>();
-		try {
-			DOMParser parser = new DOMParser();
-			parser.parse(directoryName);
-			Document doc = parser.getDocument();
-
-			NodeList nodelist = doc.getElementsByTagName("node");
-
-			System.err.println("Nodes " + nodelist.getLength());
-
-			for (int i = 0; i < nodelist.getLength(); i++){
-				org.w3c.dom.Node n = nodelist.item(i);
-				if (n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE ){
-					Element e = (Element)n;
-					nodes.add(e.getAttribute("id").split("n")[1]);
-				}
-			}
-
-			int newsize = nodes.size();
-			int size = Network.size();
-			for (int i = newsize; i < size; i++)
-				((SNNode)Network.remove(CommonState.r.nextInt(Network.size()))).setOnline(false);
-
-			for (int i = size; i < newsize; i++)
-				Network.add((Node)Network.prototype.clone());
-
-			System.err.println(Network.size() + " " + nodes.size());
-
-			nodelist = doc.getElementsByTagName("edge");
-			for (int i = 0; i < nodelist.getLength(); i++){
-				org.w3c.dom.Node n = nodelist.item(i);
-				if (n.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE){
-					Element e = (Element)n;
-					String src = e.getAttribute("source").split("n")[1];
-					String dest = e.getAttribute("target").split("n")[1];
-					
-					((Linkable)Network.get(nodes.indexOf(src)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(dest)));
-					((Linkable)Network.get(nodes.indexOf(dest)).getProtocol(pid)).addNeighbor(Network.get(nodes.indexOf(src)));
-				}
-			}
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return false;
-		}
-
-		return true;
 	}
 	
 	private void adjustNetworkSize(int newSize)
@@ -111,10 +52,7 @@ public class InitSocialNetwork implements Control
 	}
 	
 	public boolean execute()
-	{
-		if (isXml)
-			parseXML();
-		
+	{		
 		try {
 			String line;
 			String tmp[] = null;

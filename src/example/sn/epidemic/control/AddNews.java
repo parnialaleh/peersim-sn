@@ -11,7 +11,7 @@ import peersim.core.Node;
 import example.sn.NewsManager;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.epidemic.message.NewsStatusChange;
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
 import example.sn.node.SNNode;
 
 public class AddNews implements Control

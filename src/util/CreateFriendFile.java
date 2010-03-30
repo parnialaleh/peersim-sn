@@ -11,7 +11,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import example.sn.graphob.UpperGraph;
+import example.sn.control.graphob.UpperGraph;
+
 
 public class CreateFriendFile
 {

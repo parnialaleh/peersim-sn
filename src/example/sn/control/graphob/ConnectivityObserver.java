@@ -1,10 +1,10 @@
-package example.sn.graphob;
+package example.sn.control.graphob;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
 import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -14,11 +14,11 @@ import peersim.util.IncrementalStats;
 
 public class ConnectivityObserver implements Control {
 
-	private static final String PAR_PROT_NCAST = "protocol.ncast";
+	private static final String PAR_PROT_GOSSIP = "protocol.gossip";
 	private static final String PAR_PROT_IDLE = "protocol.idle";
 
 	protected final String name;
-	protected final int pidNcast;
+	protected final int pidGossip;
 	protected final int pidIdle;
 	protected int nodes = 0;
 	protected int[] n;
@@ -35,13 +35,13 @@ public class ConnectivityObserver implements Control {
 	
 	public ConnectivityObserver(String name) {
 		this.name = name;
-		pidNcast = Configuration.getPid(name + "." + PAR_PROT_NCAST);
+		pidGossip = Configuration.getPid(name + "." + PAR_PROT_GOSSIP);
 		pidIdle = Configuration.getPid(name + "." + PAR_PROT_IDLE);
 	}
 	
 	public ConnectivityObserver(int pidNcast, int pidIdle)
 	{
-		this.pidNcast = pidNcast;
+		this.pidGossip = pidNcast;
 		this.pidIdle = pidIdle;
 		this.name = "";
 	}
@@ -195,7 +195,7 @@ public class ConnectivityObserver implements Control {
 		for (i = 0; i < node.size(); ++i) {
 			n[i] = i;
 			tmp = node.get(i);
-			linkable = (LinkableSN) tmp.getProtocol(pidNcast);
+			linkable = (LinkableSN) tmp.getProtocol(pidGossip);
 			nDegree = linkable.degree();
 			for (j = 0; j < nDegree; ++j){
 				nd = (SNNode)linkable.getNeighbor(j);

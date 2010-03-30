@@ -4,7 +4,7 @@ import java.util.List;
 
 import example.sn.NewsManager;
 import example.sn.epidemic.message.News;
-import example.sn.newscast.LinkableSN;
+import example.sn.linkable.LinkableSN;
 import example.sn.newscast.NodeEntry;
 import example.sn.node.SNNode;
 
@@ -18,19 +18,19 @@ import peersim.util.IncrementalStats;
 public class DisseminationObserver implements Control
 {
 	private static final String PAR_PROTOCOL_NEWS = "protocol.news";
-	private static final String PAR_PROTOCOL_NEWSCAST = "protocol.newscast";
+	private static final String PAR_PROTOCOL_GOSSIP = "protocol.gossip";
 	private static final String PAR_PROTOCOL_IDLE = "protocol.idle";
 
 	
 	private final int pidNews;
-	private final int pidNewscast;
+	private final int pidGossip;
 	private final int pidIdle;
 	private final String name;
 
 	public DisseminationObserver(String n)
 	{
 		this.pidNews = Configuration.getPid(n + "." + PAR_PROTOCOL_NEWS);
-		this.pidNewscast = Configuration.getPid(n + "." + PAR_PROTOCOL_NEWSCAST);
+		this.pidGossip = Configuration.getPid(n + "." + PAR_PROTOCOL_GOSSIP);
 		this.pidIdle = Configuration.getPid(n + "." + PAR_PROTOCOL_IDLE);
 		this.name = n;
 	}
@@ -40,7 +40,7 @@ public class DisseminationObserver implements Control
 	{
 		List<News> news = null;
 		Node n = null;
-		LinkableSN ncast = null;
+		//LinkableSN ncast = null;
 		LinkableSN idle = null;
 		NodeEntry[] friends = null;
 		int know = 0;
@@ -53,7 +53,7 @@ public class DisseminationObserver implements Control
 			//News list
 			news = ((NewsManager)n.getProtocol(pidNews)).getOwnNews(n);
 
-			ncast = (LinkableSN)n.getProtocol(pidNewscast);
+			//ncast = (LinkableSN)n.getProtocol(pidNewscast);
 			idle = (LinkableSN)n.getProtocol(pidIdle);			
 
 			for (News nw : news){
@@ -61,13 +61,13 @@ public class DisseminationObserver implements Control
 				friendsNo = 0;
 				
 				//Friend list
-				friends = ncast.getFriends(n, n);
+				/*friends = ncast.getFriends(n, n);
 				for (NodeEntry ne : friends)
 					if (ne.n.isUp()){
 						if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw))
 							know++;
 						friendsNo++;
-					}
+					}*/
 				
 				friends = idle.getFriends(n, n);
 				for (NodeEntry ne : friends)
