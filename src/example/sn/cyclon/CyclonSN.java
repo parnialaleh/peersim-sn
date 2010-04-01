@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import example.cyclon.CyclonEntry;
+import example.cyclon.CyclonMessage;
 import example.sn.linkable.LinkableSN;
 import example.sn.newscast.NodeEntry;
+import example.sn.node.SNNode;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
@@ -22,6 +25,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private static final String PAR_L = "l";
 	private static final String PAR_TRANSPORT = "transport";
 	private static final String PAR_IDLE = "idle";
+	private static final long TIMEOUT = 5000;
 
 	private final int size;
 	private final int l;
@@ -49,23 +53,43 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		Collections.sort(cache, new CyclonEntry());
 	}
 
-	private Node selectNeighbor()
+	private CyclonEntry selectNeighbor()
 	{
-		try{
-			return cache.remove(cache.size()-1).n;
+		try{			
+			int i = cache.size()-1;
+
+			if (cache.get(i).removed && (CommonState.getTime() - cache.get(i).timeRemoved) >= TIMEOUT){
+				cache.remove(i);
+				i--;
+			}
+
+			while (cache.get(i).removed)
+				i--;
+			return cache.get(i);
 		} catch (Exception e){
 			return null;
 		}
 	}
 
+	/**
+	 * Return a list with all the friends of rnode I know up in the network
+	 * 
+	 * @param rnode
+	 * @return
+	 */
 	private List<CyclonEntry> initList(Node rnode)
 	{
 		Linkable idleProtocol = (Linkable)rnode.getProtocol(idle);
 
 		List<CyclonEntry> list = new ArrayList<CyclonEntry>();
-		for (CyclonEntry ce : cache)
-			if (idleProtocol.contains(ce.n))
+		for (CyclonEntry ce : cache){
+			if (ce.removed && (CommonState.getTime() -ce.timeRemoved) >= TIMEOUT){
+				System.out.println("TIMEOUT " + CommonState.getTime());
+				ce.reuseNode();
+			}
+			if (idleProtocol.contains(ce.n) && !ce.removed)
 				list.add(ce);
+		}
 
 		return list;
 	}
@@ -78,24 +102,41 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	 * @param rnode
 	 * @return
 	 */
-	private List<CyclonEntry> selectNeighbors(int l, Node rnode)
+	private List<CyclonEntry> selectNeighbors(int l, Node rnode, boolean selectedAtRequest)
 	{
 		int dim = Math.min(l, cache.size()-1);
 		List<CyclonEntry> list = initList(rnode);
 
 		while (list.size() > dim)
 			list.remove(CommonState.r.nextInt(list.size()));
-
-		/*List<Integer> tmp = new ArrayList<Integer>();
-		for (int i = 0; i < cache.size()-1; i++)
-			tmp.add(i);
-
-		for (int i = 0; i < dim; i++){
-			CyclonEntry ce = cache.get(tmp.remove(CommonState.r.nextInt(tmp.size())));
-			list.add(ce);
-		}*/
-
+		
+		for (CyclonEntry ce : list)
+			ce.removeNode(rnode, selectedAtRequest);
+		
 		return list;
+
+		/*
+		 * int dim = Math.min(l, cache.size()-1);
+		 * List<CyclonEntry> list = new ArrayList<CyclonEntry>(dim);
+
+		 * List<Integer> tmp = new ArrayList<Integer>();
+		 * for (int i = 0; i < cache.size(); i++)
+		 * 	if (!cache.get(i).removed)
+		 * 		tmp.add(i);
+		 * 	else if ((CommonState.getTime() - cache.get(i).timeRemoved) >= TIMEOUT){
+		 * 		System.out.println("TIMEOUT " + CommonState.getTime());
+		 * 		cache.get(i).reuseNode();
+		 * 		tmp.add(i);
+		 * 	}
+
+		 * int sup = Math.min(dim, tmp.size());
+		 * for (int i = 0; i < sup; i++){
+		 * 	CyclonEntry ce = cache.get((tmp.remove(CommonState.r.nextInt(tmp.size())).intValue()));
+		 * 	ce.removeNode(rnode, selectedAtRequest);
+		 * 	list.add(ce);
+		 * }
+		 * return list;
+		 * */
 	}
 
 	private List<CyclonEntry> discardEntries(Node n, List<CyclonEntry> list)
@@ -108,45 +149,53 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 
 		return newList;
 	}
-
-	private int indexOf(CyclonEntry ce)
+	
+	private int getFirstDeleted(Node rnode, boolean selectedAtRequest)
 	{
-		for (int i = 0; i < cache.size(); i++)
-			if (cache.get(i).n.equals(ce.n))
+		for (int i = cache.size()-1 ; i >= 0; i--)
+			if (cache.get(i).removed && cache.get(i).nodeSended.equals(rnode) && cache.get(i).selectedAtRequest == selectedAtRequest)
 				return i;
 
 		return -1;
 	}
 
-	private void insertReceivedItems(List<CyclonEntry> list, List<CyclonEntry> sentList)
+	private int indexOf(Node n)
 	{
+		for (int i = 0; i < cache.size(); i++)
+			if (cache.get(i).n.equals(n))
+				return i;
+
+		return -1;
+	}
+
+	private void insertReceivedItems(List<CyclonEntry> list, Node rnode, boolean selectedAtRequest)
+	{
+		if (selectedAtRequest)
+			try{
+			cache.set(indexOf(rnode) , new CyclonEntry(list.remove(0)));
+			} catch (Exception e){
+				System.err.println(CommonState.getNode().getID() + " " + rnode.getID());
+				e.printStackTrace();
+			}
+		
 		for (CyclonEntry ce : list){
+			// firstly using empty cache slots
 			if (cache.size() < size)
 				cache.add(new CyclonEntry(ce.n, ce.age));
+			// secondly replacing entries among the ones sent to rnode
 			else{
-				int index = 0;
-				while (index < sentList.size() && indexOf(sentList.get(index)) < 0)
-					index++;
-				if (index >= sentList.size())
+				int index = getFirstDeleted(rnode, selectedAtRequest);
+				if (index < 0){
+					System.err.println("PROBLEM " + ((SNNode)CommonState.getNode()).getRealID() + " " + cache.size() + " " + ((SNNode)rnode).getRealID());
 					return;
-				cache.set(indexOf(sentList.remove(index)), new CyclonEntry(ce.n, ce.age));
+				}
+				cache.set(index, new CyclonEntry(ce.n, ce.age));
 			}
 		}
-		/*//Add received items to the cache
-		insertItems(list);
 
-		if (cache.size()-1 >= size)
-			return;
-
-		//I've received less data that one I've sent, so
-		//reuse some sent entries
-		int cacheSize = cache.size();
-		int sListSize = sList.size();
-		for (int i = 0; i < Math.min(size-cacheSize-1, sListSize-1); i++){
-			int pos = CommonState.r.nextInt(sList.size());
-			CyclonEntry ce = sList.remove(pos);
-			cache.add(ce);
-		}*/
+		for (CyclonEntry ce : cache)
+			if (ce.nodeSended != null && ce.nodeSended.equals(rnode) && ce.selectedAtRequest == selectedAtRequest)
+				ce.reuseNode();
 	}
 	//-------------------------------------------------------------------
 
@@ -207,14 +256,12 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 
 		List<CyclonEntry> nodesToSend = null;
 		if (message.isResuest){
-			nodesToSend = selectNeighbors(message.list.size(), message.node);
+			nodesToSend = selectNeighbors(message.list.size(), message.node, false);
 
-			CyclonMessage msg = new CyclonMessage(node, nodesToSend, false, message.list);
+			CyclonMessage msg = new CyclonMessage(node, nodesToSend, false);
 			Transport tr = (Transport) node.getProtocol(tid);
 			tr.send(node, message.node, msg, pid);
 		}
-		else
-			nodesToSend = message.sentList;
 
 		// 5. Discard entries pointing to P, and entries that are already in P’s cache.
 		List<CyclonEntry> list = discardEntries(node, message.list);
@@ -222,7 +269,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		// 6. Update P’s cache to include all remaining entries, by firstly using empty
 		//    cache slots (if any), and secondly replacing entries among the ones originally
 		//    sent to Q.
-		insertReceivedItems(list, nodesToSend);
+		if (list.size() > 0)
+			insertReceivedItems(list, message.node, !message.isResuest);
 
 		// 1. Increase by one the age of all neighbors.
 		increaseAgeAndSort();
@@ -234,21 +282,21 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		//increaseAgeAndSort();
 
 		// 2. Select neighbor Q with the highest age among all neighbors...
-		Node q = selectNeighbor();
-		if (q == null){
+		CyclonEntry ce = selectNeighbor();
+		if (ce == null){
 			System.err.println("No Peer");
 			return;
 		}
 		//    and l − 1 other random neighbors.
-		List<CyclonEntry> nodesToSend = selectNeighbors(l-1, q);
+		List<CyclonEntry> nodesToSend = selectNeighbors(l-1, ce.n, true);
 
 		// 3. Replace Q’s entry with a new entry of age 0 and with P’s address.
-		nodesToSend.add(0, new CyclonEntry(node, 0));
+		nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
 
 		// 4. Send the updated subset to peer Q.
-		CyclonMessage message = new CyclonMessage(node, nodesToSend, true, null);
+		CyclonMessage message = new CyclonMessage(node, nodesToSend, true);
 		Transport tr = (Transport) node.getProtocol(tid);
-		tr.send(node, q, message, protocolID);
+		tr.send(node, ce.n, message, protocolID);
 	}
 
 	@Override

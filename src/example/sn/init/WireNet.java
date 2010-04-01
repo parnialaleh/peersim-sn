@@ -3,11 +3,11 @@ package example.sn.init;
 import java.util.HashSet;
 import java.util.Set;
 
-import example.sn.gossip.protocol.Cyclon;
 import example.sn.linkable.LinkableSN;
 
 import peersim.config.Configuration;
 import peersim.core.Control;
+import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
 
@@ -33,7 +33,7 @@ public class WireNet implements Control
 		for (int i = 0; i < Network.size(); i++){
 			Node node = Network.get(i);
 			LinkableSN idle = (LinkableSN)node.getProtocol(pIdle);
-			Cyclon cyclon = (Cyclon)node.getProtocol(pid);
+			Linkable cyclon = (Linkable)node.getProtocol(pid);
 
 			Set<Node> set = new HashSet<Node>();
 			if (idle.degree() <= n){

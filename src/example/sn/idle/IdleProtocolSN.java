@@ -10,7 +10,7 @@ import peersim.core.Protocol;
 
 public class IdleProtocolSN extends LinkableSN implements Protocol
 {
-	private static final int DEFAULT_INITIAL_CAPACITY = 10;
+	private static final int DEFAULT_INITIAL_CAPACITY = 50;
 	private static final String PAR_INITCAP = "capacity";
 	protected NodeEntry[] neighbors;
 	protected int len;
