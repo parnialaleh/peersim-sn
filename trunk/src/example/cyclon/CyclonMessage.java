@@ -11,16 +11,13 @@ public class CyclonMessage
 	public List<CyclonEntry> list;
 	public boolean isResuest;
 	
-	public List<CyclonEntry> sentList;
-	
 	public long time;
 
-	public CyclonMessage(Node node, List<CyclonEntry> list, boolean isRequest, List<CyclonEntry> sentList)
+	public CyclonMessage(Node node, List<CyclonEntry> list, boolean isRequest)
 	{
 		this.node = node;
 		this.list = list;
 		this.isResuest = isRequest;
-		this.sentList = sentList;
 		
 		this.time = CommonState.getTime();
 	}

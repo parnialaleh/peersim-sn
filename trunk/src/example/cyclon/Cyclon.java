@@ -18,6 +18,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 	private static final String PAR_CACHE = "cache";
 	private static final String PAR_L = "l";
 	private static final String PAR_TRANSPORT = "transport";
+	private static final long TIMEOUT = 5000;
 
 	private final int size;
 	private final int l;
@@ -45,8 +46,14 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 
 	private CyclonEntry selectNeighbor()
 	{
-		try{
+		try{			
 			int i = cache.size()-1;
+			
+			if (cache.get(i).removed && (CommonState.getTime() - cache.get(i).timeRemoved) >= TIMEOUT){
+				cache.remove(i);
+				i--;
+			}
+			
 			while (cache.get(i).removed)
 				i--;
 			return cache.get(i);
@@ -64,7 +71,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		for (int i = 0; i < cache.size(); i++)
 			if (!cache.get(i).removed)
 				tmp.add(i);
-			else if ((CommonState.getTime() - cache.get(i).timeRemoved) >= 5000){
+			else if ((CommonState.getTime() - cache.get(i).timeRemoved) >= TIMEOUT){
 				System.out.println("TIMEOUT " + CommonState.getTime());
 				cache.get(i).reuseNode();
 				tmp.add(i);
@@ -207,7 +214,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		if (message.isResuest){
 			nodesToSend = selectNeighbors(message.list.size(), message.node, false);
 
-			CyclonMessage msg = new CyclonMessage(node, nodesToSend, false, message.list);
+			CyclonMessage msg = new CyclonMessage(node, nodesToSend, false);
 			Transport tr = (Transport) node.getProtocol(tid);
 			tr.send(node, message.node, msg, pid);
 			
@@ -274,7 +281,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
 
 		// 4. Send the updated subset to peer Q.
-		CyclonMessage message = new CyclonMessage(node, nodesToSend, true, null);
+		CyclonMessage message = new CyclonMessage(node, nodesToSend, true);
 		Transport tr = (Transport) node.getProtocol(tid);
 		tr.send(node, ce.n, message, protocolID);
 		//		if (CommonState.getNode().getID() == 801){
