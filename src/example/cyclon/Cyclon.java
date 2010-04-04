@@ -18,7 +18,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 	private static final String PAR_CACHE = "cache";
 	private static final String PAR_L = "l";
 	private static final String PAR_TRANSPORT = "transport";
-	private static final long TIMEOUT = 5000;
+	private static final long TIMEOUT = 2000;
 
 	private final int size;
 	private final int l;
@@ -72,7 +72,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 			if (!cache.get(i).removed)
 				tmp.add(i);
 			else if ((CommonState.getTime() - cache.get(i).timeRemoved) >= TIMEOUT){
-				System.out.println("TIMEOUT " + CommonState.getTime());
+				//System.out.println("TIMEOUT " + CommonState.getTime());
 				cache.get(i).reuseNode();
 				tmp.add(i);
 			}
@@ -89,11 +89,14 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 
 	private List<CyclonEntry> discardEntries(Node n, List<CyclonEntry> list)
 	{
+		int index = 0;
 		List<CyclonEntry> newList = new ArrayList<CyclonEntry>();
-		for (CyclonEntry ce : list){
-			if (!ce.n.equals(n) && !contains(ce.n))
+		for (CyclonEntry ce : list)
+			if (!ce.n.equals(n) && (index = indexOf(ce.n)) < 0)
 				newList.add(ce);
-		}
+			//Duplicate, take the newest one
+			else if (index >= 0)
+				cache.get(index).age = Math.max(ce.age, cache.get(index).age);
 
 		return newList;
 	}
@@ -120,6 +123,12 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 	{
 //		if (CommonState.getNode().getID() == 9784)
 //			System.err.println(rnode.getID() + " " + selectedAtRequest);
+		
+		if (list.isEmpty()){
+			System.err.println("Empty");
+			cache.remove(indexOf(rnode));
+			return;
+		}
 		
 		if (selectedAtRequest)
 			try{
@@ -266,7 +275,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		// 2. Select neighbor Q with the highest age among all neighbors...
 		CyclonEntry ce = selectNeighbor();
 		if (ce == null){
-			System.err.println("No Peer");
+			System.err.println(node.getID() + ": no Peer");
 			return;
 		}
 		ce.removeNode(ce.n, true);
