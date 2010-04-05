@@ -1,4 +1,4 @@
-package example.sn.newscast;
+package example.newscast;
 
 import peersim.core.Node;
 
@@ -37,7 +37,7 @@ public class NodeEntry implements Comparable<NodeEntry>, Cloneable
 	}
 	
 	@Override
-	protected Object clone(){
+	public Object clone(){
 		NodeEntry ne = null;
 		try { ne = (NodeEntry) super.clone(); }
 		catch( CloneNotSupportedException e ) {} // never happens

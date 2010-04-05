@@ -1,4 +1,4 @@
-package example.sn.newscast;
+package example.newscast;
 
 import peersim.core.Node;
 

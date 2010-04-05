@@ -15,7 +15,7 @@ import example.sn.gossip.item.ItemAge;
 import example.sn.gossip.item.ItemSim;
 import example.sn.gossip.message.CyclonMessage;
 import example.sn.linkable.LinkableSN;
-import example.sn.newscast.NodeEntry;
+import example.newscast.NodeEntry;
 import peersim.config.Configuration;
 import peersim.core.*;
 import peersim.transport.Transport;

@@ -280,9 +280,6 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		}
 		ce.removeNode(ce.n, true);
 		
-//		if ((node.getID() == 9784) || (node.getID() == 9784))
-//			System.err.println("SELECTED NODE " + ce.n.getID());
-		
 		//    and l − 1 other random neighbors.
 		List<CyclonEntry> nodesToSend = selectNeighbors(l-1, ce.n, true);
 
@@ -293,8 +290,14 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		CyclonMessage message = new CyclonMessage(node, nodesToSend, true);
 		Transport tr = (Transport) node.getProtocol(tid);
 		tr.send(node, ce.n, message, protocolID);
-		//		if (CommonState.getNode().getID() == 801){
-		//			System.out.println("INITIATOR");
-		//		}
+	}
+	
+	public String toString()
+	{
+		String s = "[";
+		for (CyclonEntry ce : cache)
+			s += "(" + ce.n.getID() + "," + ce.age + ")";
+		s += "]";
+		return s;
 	}
 }

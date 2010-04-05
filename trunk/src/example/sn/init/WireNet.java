@@ -1,8 +1,5 @@
 package example.sn.init;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import example.sn.linkable.LinkableSN;
 
 import peersim.config.Configuration;
@@ -35,8 +32,13 @@ public class WireNet implements Control
 			LinkableSN idle = (LinkableSN)node.getProtocol(pIdle);
 			Linkable cyclon = (Linkable)node.getProtocol(pid);
 
-			Set<Node> set = new HashSet<Node>();
-			if (idle.degree() <= n){
+			//Set<Node> set = new HashSet<Node>();
+			
+			for (int j = 0; j < Math.min(idle.degree(), n); j++)
+				cyclon.addNeighbor(idle.getNeighbor(j));
+			
+			/*
+			 if (idle.degree() <= n){
 				set.add(idle.getNeighbor(0));
 			}
 			else
@@ -48,6 +50,7 @@ public class WireNet implements Control
 			
 			for (Node n : set.toArray(new Node[0]))
 				cyclon.addNeighbor(n);
+				*/
 		}
 
 		return false;

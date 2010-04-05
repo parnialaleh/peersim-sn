@@ -5,7 +5,7 @@ import java.util.List;
 import example.sn.NewsManager;
 import example.sn.epidemic.message.News;
 import example.sn.linkable.LinkableSN;
-import example.sn.newscast.NodeEntry;
+import example.newscast.NodeEntry;
 import example.sn.node.SNNode;
 
 import peersim.config.Configuration;
