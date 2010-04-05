@@ -11,14 +11,10 @@ public class DegreeObserver implements Control
 {
 	private final static String PAR_PID = "protocol";
 	private final static String PAR_IDLE = "idle";
-	private static final String PAR_START_PROTOCOL = "starttime";
-	private static final String PAR_END_PROTOCOL = "endtime";
 
 	private final int pid;
 	private final int idle;
 	private final String name;
-	private final long startTime;
-	private final long endTime;
 	
 	protected class Entry{
 		public int inDegree;
@@ -51,16 +47,11 @@ public class DegreeObserver implements Control
 	{
 		this.pid = Configuration.getPid(prefix + "." + PAR_PID);
 		this.idle = Configuration.getPid(prefix + "." + PAR_IDLE);
-		this.startTime = Configuration.getLong(prefix + "." + PAR_START_PROTOCOL, Long.MIN_VALUE);
-		this.endTime = Configuration.getLong(prefix + "." + PAR_END_PROTOCOL, Long.MAX_VALUE);
 		this.name = prefix;
 	}
 		
 	public boolean execute()
 	{
-		if ((CommonState.getTime() >= endTime) || (CommonState.getTime() < startTime))
-			return false;
-		
 		Entry[] entry = new Entry[Network.size()];
 		for (int i = 0; i < Network.size(); i++){
 			entry[i] = new Entry();

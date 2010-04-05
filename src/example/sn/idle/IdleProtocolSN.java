@@ -1,7 +1,7 @@
 package example.sn.idle;
 
 import example.sn.linkable.LinkableSN;
-import example.sn.newscast.NodeEntry;
+import example.newscast.NodeEntry;
 import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;

@@ -14,14 +14,10 @@ import peersim.util.IncrementalStats;
 public class DegreeObserver implements Control
 {
 	private final static String PAR_PID = "protocol";
-	private static final String PAR_START_PROTOCOL = "starttime";
-	private static final String PAR_END_PROTOCOL = "endtime";
 	private static final String PAR_DEAD = "dead";
 
 	private final int pid;
 	private final String name;
-	private final long startTime;
-	private final long endTime;
 	private final boolean dead;
 
 	private class Entry
@@ -33,8 +29,6 @@ public class DegreeObserver implements Control
 	public DegreeObserver(String prefix)
 	{
 		this.pid = Configuration.getPid(prefix + "." + PAR_PID);
-		this.startTime = Configuration.getLong(prefix + "." + PAR_START_PROTOCOL, Long.MIN_VALUE);
-		this.endTime = Configuration.getLong(prefix + "." + PAR_END_PROTOCOL, Long.MAX_VALUE);
 		this.dead = Configuration.contains(prefix + "." + PAR_DEAD);
 		this.name = prefix;
 	}
@@ -49,9 +43,6 @@ public class DegreeObserver implements Control
 
 	public boolean execute()
 	{
-		if ((CommonState.getTime() >= endTime) || (CommonState.getTime() < startTime))
-			return false;
-
 		Entry[] entry = new Entry[Network.size()];
 		for (int i = 0; i < Network.size(); i++){
 			entry[i] = new Entry();
@@ -90,5 +81,4 @@ public class DegreeObserver implements Control
 
 		return false;
 	}
-
 }
