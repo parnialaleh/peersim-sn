@@ -1,9 +1,6 @@
 package example.sn;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import peersim.config.Configuration;
@@ -85,7 +82,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	private boolean isInList(Node n, List<News> list)
 	{
 		for (News nw : list)
-			if (nw.getNode().equals(n))
+			if (nw.getSourceNode().equals(n))
 				return true;
 		return false;
 	}
@@ -103,22 +100,6 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	{
 		List<News> list = ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews();
 
-		/*Node n = null;
-		if (list.size() == 0)
-			n = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getPeer(lnode);
-		else
-			n = list.get(CommonState.r.nextInt(list.size())).getNode();
-
-		if (n == null)
-			return null;
-
-		Node peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
-
-		while (peer.getID() == lastSelectedPeer)
-			peer = ((LinkableSN)(lnode.getProtocol(pidNetworkManger))).getFriendPeer(lnode, n);
-
-		return peer;*/
-
 		AnalizeFriends af = new AnalizeFriends(pidGossip, pidIdle, (SNNode)lnode);
 		List<List<Node>> cluster = af.analize();
 		Collections.shuffle(cluster, CommonState.r);
@@ -131,18 +112,23 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 				for (Node n : cluster.get(i))
 					if (isInList(n, list)){
 						Node peer = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, n);
+						if (peer != null){
+							lastSelectedPeer = peer.getID();
+							return peer;
+						}
+					}
+			}
+
+		if (lastSelectedCluster >= 0)
+			//Nothing found in other clusters
+			for (Node n : cluster.get(lastSelectedCluster))
+				if (isInList(n, list)){
+					Node peer = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, n);
+					if (peer != null){
 						lastSelectedPeer = peer.getID();
 						return peer;
 					}
-			}
-		
-		//Nothing found in other clusters
-		for (Node n : cluster.get(lastSelectedCluster))
-			if (isInList(n, list)){
-				Node peer = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, n);
-				lastSelectedPeer = peer.getID();
-				return peer;
-			}
+				}
 
 		//No messages
 		return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);

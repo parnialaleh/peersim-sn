@@ -9,6 +9,7 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 import example.sn.NewsManager;
+import example.sn.epidemic.message.NewsComment;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.epidemic.message.NewsStatusChange;
 import example.sn.linkable.LinkableSN;
@@ -21,8 +22,7 @@ public class AddNews implements Control
 	private static final String PAR_PROT_NEWSCAST = "protocol.newscast";
 	private static final String PAR_FRIENDSHIP = "friendshipNo";
 	private static final String PAR_STATUS_CHANGE = "statusChangeNo";
-	private static final String PAR_START_PROTOCOL = "starttime";
-	private static final String PAR_END_PROTOCOL = "endtime";
+	private static final String PAR_COMMENT = "commentNo";
 	//private static final String PAR_ROOT = "root";
 
 	private final int pidNewsManager;
@@ -30,8 +30,7 @@ public class AddNews implements Control
 	private final int pidNewscast;
 	private final int friendshipNo;
 	private final int statusChangeNo;
-	private final long startTime;
-	private final long endTime;
+	private final int commentNo;
 	private static long root;
 
 	public AddNews(String n)
@@ -41,8 +40,7 @@ public class AddNews implements Control
 		this.pidNewscast = Configuration.getPid(n + "." + PAR_PROT_NEWSCAST);
 		this.friendshipNo = Configuration.getInt(n + "." + PAR_FRIENDSHIP);
 		this.statusChangeNo = Configuration.getInt(n + "." + PAR_STATUS_CHANGE);
-		this.startTime = Configuration.getLong(n + "." + PAR_START_PROTOCOL, Long.MIN_VALUE);
-		this.endTime = Configuration.getLong(n + "." + PAR_END_PROTOCOL, Long.MAX_VALUE);
+		this.commentNo = Configuration.getInt(n + "." + PAR_COMMENT);
 		//this.root = Configuration.getLong(n + "." + PAR_ROOT);
 	}
 	
@@ -57,10 +55,7 @@ public class AddNews implements Control
 
 
 	public boolean execute()
-	{
-		if ((CommonState.getTime() >= endTime) || (CommonState.getTime() < startTime))
-			return false;
-		
+	{		
 		final int size = Network.size();
 		Set<Integer> s = new HashSet<Integer>();
 
@@ -72,6 +67,18 @@ public class AddNews implements Control
 			if (!s.contains(i) && Network.get(i).isUp()){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				newsManager.addNews(new NewsStatusChange(Network.get(i)), Network.get(i));
+				s.add(i);
+			}
+		}
+		
+		s = new HashSet<Integer>();
+		while (s.size() < commentNo){
+			//i = CommonState.r.nextInt(size);
+			i = indexOf(root);
+			if (!s.contains(i) && Network.get(i).isUp()){
+				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
+				newsManager.addNews(new NewsComment(Network.get(i),
+						((LinkableSN)Network.get(i).getProtocol(pidIdle)).getFriendPeer(Network.get(i), Network.get(i))), Network.get(i));
 				s.add(i);
 			}
 		}

@@ -183,19 +183,14 @@ public class AnalizeFriends extends ConnectivityObserver
 	public List<List<Node>> analize()
 	{
 		// inizializzazione grafo della rete
-		System.out.println("INIT");
 		graphInit();
 		// esecuzione dfs
-		System.out.println("DFS");
 		dfs();
 		// ordinamento in ordine decrescente di ft
-		System.out.println("SORT");
 		sort(0, nodes - 1);
 		// esecuzione dfs su G' (grafo trasposto)
-		System.out.println("DFST");
 		dfsT();
 		// visita dell'albero generato dall'ultima dfs
-		System.out.println("VISTI");
 		return treeVisit();		
 	}
 

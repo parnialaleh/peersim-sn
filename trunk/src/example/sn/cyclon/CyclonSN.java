@@ -2,13 +2,14 @@ package example.sn.cyclon;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import example.cyclon.CyclonEntry;
 import example.cyclon.CyclonMessage;
 import example.newscast.NodeEntry;
 import example.sn.linkable.LinkableSN;
-import example.sn.node.SNNode;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
@@ -126,7 +127,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		for (CyclonEntry ce : list)
 			if (!ce.n.equals(n) && (index = indexOf(ce.n)) < 0)
 				newList.add(ce);
-		//Duplicate, take the newest one
+			//Duplicate, take the newest one
 			else if (index >= 0)
 				cache.get(index).age = Math.max(ce.age, cache.get(index).age);
 
@@ -330,9 +331,37 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 
 	@Override
 	public Node getFriendPeer(Node lnode, Node n)
-	{
-		LinkableSN linkable = (LinkableSN)lnode.getProtocol(idle);
-		return linkable.getFriendPeer(lnode, n);
+	{		
+		//LinkableSN lLinkable = (LinkableSN)lnode.getProtocol(idle);
+		LinkableSN rLinkable = (LinkableSN)n.getProtocol(idle);
+		Set<Node> set = new HashSet<Node>();
+		
+		/*//n is my friend
+		if (lLinkable.containsAsFriend(lnode, n)){	
+			//search in cache all the friends I know to be up
+			for (CyclonEntry ce : cache)
+				if (rLinkable.contains(n))
+					list.add(ce.n);
+		}
+		else{
+			for (CyclonEntry ce : cache){
+				rLinkable = (LinkableSN)ce.n.getProtocol(idle);
+				if (rLinkable.contains(n))
+					list.add(ce.n);
+			}
+		}*/
+		
+		for (CyclonEntry ce : cache){
+			if (rLinkable.containsAsFriend(lnode, n))
+				set.add(ce.n);
+			if (((LinkableSN)ce.n.getProtocol(idle)).containsAsFriend(lnode, n))
+				set.add(ce.n);
+		}
+		
+		if (set.size() > 0)
+			return set.toArray(new Node[0])[CommonState.r.nextInt(set.size())];
+		
+		return null;
 	}
 
 	@Override
