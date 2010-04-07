@@ -4,8 +4,8 @@ import peersim.core.Node;
 
 public class NewsStatusChange extends News
 {
-	public NewsStatusChange(Node n)
+	public NewsStatusChange(Node sourceNode)
 	{
-		super(n);
+		super(sourceNode, sourceNode);
 	}
 }

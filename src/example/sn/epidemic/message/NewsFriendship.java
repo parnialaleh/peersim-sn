@@ -9,7 +9,7 @@ public class NewsFriendship extends News
 	
 	public NewsFriendship(Node source, Node dest)
 	{
-		super(source);
+		super(source, dest);
 		this.setDestId(dest.getIndex());
 	}
 

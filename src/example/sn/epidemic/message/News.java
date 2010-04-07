@@ -6,11 +6,13 @@ import peersim.core.Node;
 public abstract class News implements Comparable<News>
 {
 	private int eventTime = 0;
-	private Node node;
+	private Node sourceNode;
+	private Node destNode;
 	
-	public News(Node n)
+	public News(Node sourceNode, Node destNode)
 	{
-		this.node = n;
+		this.sourceNode = sourceNode;
+		this.destNode = destNode;
 		this.eventTime = CommonState.getIntTime();
 	}
 	
@@ -29,9 +31,14 @@ public abstract class News implements Comparable<News>
 		return 0;
 	}
 	
-	public Node getNode()
+	public Node getSourceNode()
 	{
-		return this.node;
+		return this.sourceNode;
+	}
+	
+	public Node getDestNode()
+	{
+		return this.destNode;
 	}
 
 }

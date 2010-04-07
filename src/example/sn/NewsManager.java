@@ -22,17 +22,14 @@ import example.sn.newscast.NewscastED;
  */
 public class NewsManager implements EDProtocol
 {
-	private static final String PAR_IDLE_MANAGER = "protocol.idle";
-	private static final String PAR_NETWORK_MANAGER = "protocol.network_manager";
+	private static final String PAR_IDLE_MANAGER = "idle";
 	
-	protected final int pidNetworkManger;
 	protected final int pidIdle;
 	
 	private List<News> news = null;
 	
 	public NewsManager(String n)
 	{
-		this.pidNetworkManger = Configuration.getPid(n + "." + PAR_NETWORK_MANAGER);
 		this.pidIdle = Configuration.getPid(n + "." + PAR_IDLE_MANAGER);
 		this.news = new ArrayList<News>();
 	}
@@ -57,7 +54,7 @@ public class NewsManager implements EDProtocol
 	{
 		this.news.add(news);
 		if (news instanceof NewsFriendship)
-			((NewscastED)n.getProtocol(pidNetworkManger)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
+			((NewscastED)n.getProtocol(pidIdle)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
 	}
 	
 	/**
@@ -82,7 +79,8 @@ public class NewsManager implements EDProtocol
 //		System.err.println(((SNNode)lnode).getRealID() + " " + ((SNNode)rnode).getRealID());
 		
 		for (News n: news)
-			if (((LinkableSN)n.getNode().getProtocol(pidNetworkManger)).containsAsFriend(n.getNode(), rnode))// || ((LinkableSN)n.getNode().getProtocol(pidIdle)).containsAsFriend(n.getNode(), rnode)){
+			if (((LinkableSN)n.getSourceNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode) ||
+					((LinkableSN)n.getDestNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode))
 				list.add(n);
 				/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
 				list.add(n);*/
@@ -103,7 +101,7 @@ public class NewsManager implements EDProtocol
 		List<News> list = new ArrayList<News>();
 		
 		for (News n: news)
-			if (n.getNode().getID() == lnode.getID())
+			if (n.getSourceNode().getID() == lnode.getID())
 				list.add(n);
 						
 		return list;
