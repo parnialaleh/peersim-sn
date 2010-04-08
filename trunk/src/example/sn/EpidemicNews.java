@@ -82,7 +82,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	private boolean isInList(Node n, List<News> list)
 	{
 		for (News nw : list)
-			if (nw.getSourceNode().equals(n))
+			if (nw.getSourceNode().equals(n) || nw.getDestNode().equals(n))
 				return true;
 		return false;
 	}
@@ -102,6 +102,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 		AnalizeFriends af = new AnalizeFriends(pidGossip, pidIdle, (SNNode)lnode);
 		List<List<Node>> cluster = af.analize();
+		//shuffle
 		Collections.shuffle(cluster, CommonState.r);
 		for (List<Node> lst : cluster)
 			Collections.shuffle(lst, CommonState.r);			
@@ -143,5 +144,4 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 	{
 		this.infected = infected;
 	}
-
 }
