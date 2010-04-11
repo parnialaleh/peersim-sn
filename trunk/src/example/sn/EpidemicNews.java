@@ -102,10 +102,11 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 		AnalizeFriends af = new AnalizeFriends(pidGossip, pidIdle, (SNNode)lnode);
 		List<List<Node>> cluster = af.analize();
+		
 		//shuffle
 		Collections.shuffle(cluster, CommonState.r);
 		for (List<Node> lst : cluster)
-			Collections.shuffle(lst, CommonState.r);			
+			Collections.shuffle(lst, CommonState.r);
 
 		int lastSelectedCluster = findLastSelectedCluster(cluster, lastSelectedPeer);
 		for (int i = 0; i < cluster.size(); i++)
@@ -114,6 +115,8 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 					if (isInList(n, list)){
 						Node peer = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, n);
 						if (peer != null){
+							//if (((SNNode)lnode).getRealID() == 1283631013)
+								//System.out.println("1283631013 -> " + ((SNNode)peer).getRealID());
 							lastSelectedPeer = peer.getID();
 							return peer;
 						}
@@ -126,12 +129,16 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 				if (isInList(n, list)){
 					Node peer = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, n);
 					if (peer != null){
+//						if (((SNNode)lnode).getRealID() == 1283631013)
+//							System.out.println("1283631013 -> " + ((SNNode)peer).getRealID());
 						lastSelectedPeer = peer.getID();
 						return peer;
 					}
 				}
 
 		//No messages
+		lastSelectedPeer = -1;
+//		System.out.println("NO MESSAGES CLUSTER");
 		return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
 	}
 

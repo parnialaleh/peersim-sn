@@ -35,7 +35,7 @@ public class AnalizeFriends extends ConnectivityObserver
 
 	private int addNode(Node nd, int nodes, Set<SNNode> node)
 	{
-		if (nd.isUp() && nd.getID() != CommonState.getNode().getID()){
+		if (nd.getID() != CommonState.getNode().getID()){
 			nodes++;
 			node.add((SNNode)nd);
 		}

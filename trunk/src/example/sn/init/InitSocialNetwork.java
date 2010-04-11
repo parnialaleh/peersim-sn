@@ -40,7 +40,7 @@ public class InitSocialNetwork implements Control
 		this.fileBegin = Configuration.getString(n + "." + PAR_FILE_BEGIN);
 		this.fileNo = Configuration.getInt(n + "." + PAR_FILE_NO);
 	}
-	
+
 	private void adjustNetworkSize(int newSize)
 	{
 		int size = Network.size();
@@ -50,7 +50,7 @@ public class InitSocialNetwork implements Control
 		for (int i = size; i < newSize; i++)
 			Network.add((Node)Network.prototype.clone());	
 	}
-	
+
 	public boolean execute()
 	{		
 		try {
@@ -58,10 +58,10 @@ public class InitSocialNetwork implements Control
 			String tmp[] = null;
 			int source = 0;
 			int friend = 0;
-			
+
 			Set<Long> idsSet = new HashSet<Long>();
 			List<Long> ids = new ArrayList<Long>();
-			
+
 			BufferedReader d = new BufferedReader(new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(new File(directoryName + fileBegin + "" + fileNo))))));
 			while ((line = d.readLine()) != null){
 				tmp = line.split(" ");
@@ -69,10 +69,10 @@ public class InitSocialNetwork implements Control
 				idsSet.add(Long.parseLong(tmp[1]));
 			}
 			d.close();
-			
+
 			for (Long l : idsSet.toArray(new Long[0]))
 				ids.add(l);
-			
+
 			adjustNetworkSize(ids.size());
 
 			boolean rootSetted = false;
@@ -87,9 +87,9 @@ public class InitSocialNetwork implements Control
 				friend = ids.indexOf(Long.parseLong(tmp[1]));
 				((SNNode)Network.get(source)).setRealID(Long.parseLong(tmp[0]));
 				((SNNode)Network.get(friend)).setRealID(Long.parseLong(tmp[1]));
-				
+
 				((Linkable)Network.get(source).getProtocol(pid)).addNeighbor(Network.get(friend));
-				((Linkable)Network.get(friend).getProtocol(pid)).addNeighbor(Network.get(source));				
+				((Linkable)Network.get(friend).getProtocol(pid)).addNeighbor(Network.get(source));
 			}
 			d.close();
 
