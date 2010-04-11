@@ -18,19 +18,19 @@ import peersim.util.IncrementalStats;
 public class DisseminationObserver implements Control
 {
 	private static final String PAR_PROTOCOL_NEWS = "protocol.news";
-	private static final String PAR_PROTOCOL_GOSSIP = "protocol.gossip";
+	//private static final String PAR_PROTOCOL_GOSSIP = "protocol.gossip";
 	private static final String PAR_PROTOCOL_IDLE = "protocol.idle";
 
 	
 	private final int pidNews;
-	private final int pidGossip;
+	//private final int pidGossip;
 	private final int pidIdle;
 	private final String name;
 
 	public DisseminationObserver(String n)
 	{
 		this.pidNews = Configuration.getPid(n + "." + PAR_PROTOCOL_NEWS);
-		this.pidGossip = Configuration.getPid(n + "." + PAR_PROTOCOL_GOSSIP);
+		//this.pidGossip = Configuration.getPid(n + "." + PAR_PROTOCOL_GOSSIP);
 		this.pidIdle = Configuration.getPid(n + "." + PAR_PROTOCOL_IDLE);
 		this.name = n;
 	}
