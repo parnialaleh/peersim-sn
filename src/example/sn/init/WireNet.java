@@ -30,12 +30,12 @@ public class WireNet implements Control
 		for (int i = 0; i < Network.size(); i++){
 			Node node = Network.get(i);
 			LinkableSN idle = (LinkableSN)node.getProtocol(pIdle);
-			Linkable cyclon = (Linkable)node.getProtocol(pid);
+			Linkable gossip = (Linkable)node.getProtocol(pid);
 
 			//Set<Node> set = new HashSet<Node>();
 			
 			for (int j = 0; j < Math.min(idle.degree(), n); j++)
-				cyclon.addNeighbor(idle.getNeighbor(j));
+				gossip.addNeighbor(idle.getNeighbor(j));
 			
 			/*
 			 if (idle.degree() <= n){

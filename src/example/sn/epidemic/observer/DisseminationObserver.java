@@ -60,15 +60,6 @@ public class DisseminationObserver implements Control
 				know = 0;
 				friendsNo = 0;
 				
-				//Friend list
-				/*friends = ncast.getFriends(n, n);
-				for (NodeEntry ne : friends)
-					if (ne.n.isUp()){
-						if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw))
-							know++;
-						friendsNo++;
-					}*/
-				
 				friends = idle.getFriends(n, n);
 				for (NodeEntry ne : friends)
 					if (ne.n.isUp()){

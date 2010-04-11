@@ -179,11 +179,12 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			// secondly replacing entries among the ones sent to rnode
 			else{
 				int index = getFirstDeleted(rnode, selectedAtRequest);
-				if (index < 0){
-					System.err.println("PROBLEM " + CommonState.getNode().getID() + " " + cache.size() + " " + rnode.getID());
-					return;
-				}
-				cache.set(index, new CyclonEntry(ce.n, ce.age));
+//				if (index < 0){
+//					System.err.println("PROBLEM " + CommonState.getNode().getID() + " " + cache.size() + " " + rnode.getID());
+//					return;
+//				}
+				if (index >= 0)
+					cache.set(index, new CyclonEntry(ce.n, ce.age));
 			}
 		}
 
@@ -351,12 +352,10 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			}
 		}*/
 		
-		for (CyclonEntry ce : cache){
-			if (rLinkable.containsAsFriend(lnode, n))
+		for (CyclonEntry ce : cache)
+			//lnode is a friend of n of ce.n is a friend of n
+			if (rLinkable.containsAsFriend(n, lnode) || ((LinkableSN)ce.n.getProtocol(idle)).containsAsFriend(lnode, n))
 				set.add(ce.n);
-			if (((LinkableSN)ce.n.getProtocol(idle)).containsAsFriend(lnode, n))
-				set.add(ce.n);
-		}
 		
 		if (set.size() > 0)
 			return set.toArray(new Node[0])[CommonState.r.nextInt(set.size())];

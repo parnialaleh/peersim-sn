@@ -72,7 +72,7 @@ public class DegreeObserver implements Control
 		}
 		
 		for (int i = 0; i < Network.size(); i++){
-			System.out.println(CommonState.getTime() + " " + name + ": " + entry[i].inDegree + " SnInDegree " + entry[i].snInDegree + " " + ((float)entry[i].inDegree / (float)entry[i].snInDegree));
+			System.out.println(" " + CommonState.getTime() + " " + name + ": " + entry[i].inDegree + " SnInDegree " + entry[i].snInDegree + " " + ((float)entry[i].inDegree / (float)entry[i].snInDegree));
 		}
 		
 		return false;

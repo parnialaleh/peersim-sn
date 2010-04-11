@@ -148,12 +148,13 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 //				if (CommonState.getNode().getID() == 9784){
 //					System.err.println("REPLACE " + cache.get(index).n.getID() + " " + cache.get(index).selectedAtRequest + " " + selectedAtRequest);
 //				}
-				if (index < 0){
-					System.err.println("PROBLEM " + CommonState.getNode().getID() + " " + cache.size() + " " + rnode.getID());
-					return;
-				}
+//				if (index < 0){
+//					System.err.println("PROBLEM " + CommonState.getNode().getID() + " " + cache.size() + " " + rnode.getID());
+//					return;
+//				}
 				//cache.set(indexOf(sentList.remove(index)), new CyclonEntry(ce.n, ce.age));
-				cache.set(index, new CyclonEntry(ce.n, ce.age));
+				if (index > 0)
+					cache.set(index, new CyclonEntry(ce.n, ce.age));
 			}
 		}
 
