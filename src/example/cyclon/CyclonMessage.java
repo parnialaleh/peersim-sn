@@ -7,17 +7,17 @@ import peersim.core.Node;
 
 public class CyclonMessage
 {
-	public Node node;
+	public Node sender;
 	public List<CyclonEntry> list;
-	public boolean isResuest;
+	public boolean isRequest;
 	
 	public long time;
 
 	public CyclonMessage(Node node, List<CyclonEntry> list, boolean isRequest)
 	{
-		this.node = node;
+		this.sender = node;
 		this.list = list;
-		this.isResuest = isRequest;
+		this.isRequest = isRequest;
 		
 		this.time = CommonState.getTime();
 	}
