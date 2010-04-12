@@ -48,14 +48,15 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 	{
 		try{			
 			int i = cache.size()-1;
-			
+
 			if (cache.get(i).removed && (CommonState.getTime() - cache.get(i).timeRemoved) >= TIMEOUT){
 				cache.remove(i);
 				i--;
 			}
-			
+
 			while (cache.get(i).removed)
 				i--;
+			
 			return cache.get(i);
 		} catch (Exception e){
 			return null;
@@ -221,12 +222,12 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		CyclonMessage message = (CyclonMessage) event;
 
 		List<CyclonEntry> nodesToSend = null;
-		if (message.isResuest){
-			nodesToSend = selectNeighbors(message.list.size(), message.node, false);
+		if (message.isRequest){
+			nodesToSend = selectNeighbors(message.list.size(), message.sender, false);
 
 			CyclonMessage msg = new CyclonMessage(node, nodesToSend, false);
 			Transport tr = (Transport) node.getProtocol(tid);
-			tr.send(node, message.node, msg, pid);
+			tr.send(node, message.sender, msg, pid);
 			
 //			if (node.getID() == 9784){
 //				System.err.println(message.isResuest + " SEND " + message.node.getID());
@@ -239,7 +240,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		}
 
 		// 5. Discard entries pointing to P, and entries that are already in P’s cache.
-		List<CyclonEntry> list = discardEntries(node, message.list);
+	 	List<CyclonEntry> list = discardEntries(node, message.list);
 
 		// 6. Update P’s cache to include all remaining entries, by firstly using empty
 		//    cache slots (if any), and secondly replacing entries among the ones originally
@@ -254,7 +255,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 //			System.err.println();
 //		}
 
-		insertReceivedItems(list, message.node, !message.isResuest);
+		insertReceivedItems(list, message.sender, !message.isRequest);
 
 //		if (node.getID() == 9784){//480
 //			for (CyclonEntry ce1 : cache){
