@@ -1,12 +1,15 @@
 package example.sn.init;
 
-import example.sn.linkable.LinkableSN;
+import java.util.ArrayList;
+import java.util.List;
 
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
+import example.sn.linkable.LinkableSN;
 
 public class WireNet implements Control
 {
@@ -33,9 +36,15 @@ public class WireNet implements Control
 			Linkable gossip = (Linkable)node.getProtocol(pid);
 
 			//Set<Node> set = new HashSet<Node>();
+
+			List<Integer> s = new ArrayList<Integer>();
+			
+			for (int j = 0; j < idle.degree(); j++)
+				s.add(j);
 			
 			for (int j = 0; j < Math.min(idle.degree(), n); j++)
-				gossip.addNeighbor(idle.getNeighbor(j));
+				//gossip.addNeighbor(idle.getNeighbor(j));
+				gossip.addNeighbor(idle.getNeighbor(s.remove(CommonState.r.nextInt(s.size()))));
 			
 			/*
 			 if (idle.degree() <= n){
