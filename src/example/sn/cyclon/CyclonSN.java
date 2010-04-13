@@ -78,7 +78,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		Linkable lNodeIdleProtocol = (Linkable)lnode.getProtocol(idle);
 		Linkable rNodeIdleProtocol = (Linkable)rnode.getProtocol(idle);
 
-		if (isRNodeFriend){
+		/*if (isRNodeFriend){
 			//rnode is my friend -> entry is relevant if it is lnode friend or rnode friend
 			if ((rNodeIdleProtocol.contains(entry.n) || lNodeIdleProtocol.contains(entry.n)) && !entry.removed)
 				return true;
@@ -91,7 +91,14 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			for (int i = 0; i < lNodeIdleProtocol.degree(); i++)
 				if (((Linkable)lNodeIdleProtocol.getNeighbor(i).getProtocol(idle)).contains(entry.n)  && !entry.removed)
 					return true;
-		}
+		}*/
+		
+		if (lNodeIdleProtocol.contains(entry.n) && !entry.removed)
+			return true;
+		
+		for (int i = 0; i < lNodeIdleProtocol.degree(); i++)
+			if (!entry.removed && ((Linkable)lNodeIdleProtocol.getNeighbor(i).getProtocol(idle)).contains(entry.n))
+				return true;
 
 		return false;
 	}

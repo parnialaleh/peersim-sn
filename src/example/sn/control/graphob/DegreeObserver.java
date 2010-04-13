@@ -1,6 +1,11 @@
 package example.sn.control.graphob;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import example.sn.epidemic.control.AddNews;
 import example.sn.linkable.LinkableSN;
+import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -49,10 +54,53 @@ public class DegreeObserver implements Control
 		this.idle = Configuration.getPid(prefix + "." + PAR_IDLE);
 		this.name = prefix;
 	}
+	
+	private int indexOf(long nodeRealID)
+	{
+		for (int i = 0; i < Network.size(); i++)
+			if (((SNNode)Network.get(i)).getRealID() == nodeRealID)
+				return i;
+		
+		return -1;
+	}
 		
 	public boolean execute()
 	{
-		Entry[] entry = new Entry[Network.size()];
+		int indegree = 0;
+		Node rootNode = Network.get(indexOf(AddNews.getRoot()));
+		
+		int indegree2 = 0;
+		int snInDegree = 0;
+		for (int i = 0; i < Network.size(); i++){
+			if (((LinkableSN)Network.get(i).getProtocol(idle)).contains(rootNode))
+				snInDegree++;
+			if (((LinkableSN)Network.get(i).getProtocol(pid)).contains(rootNode))
+				indegree2++;
+		}
+		
+		LinkableSN linkable = (LinkableSN)rootNode.getProtocol(idle);
+		Set<Node> set = new HashSet<Node>();
+		for (int i = 0; i < linkable.degree(); i++){
+			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(idle);
+			set.add(linkable.getNeighbor(i));
+			for (int j = 0; j < rLinkable.degree(); j++)
+				set.add(rLinkable.getNeighbor(j));
+		}
+		for (Node n : set)
+			if (((LinkableSN)n.getProtocol(pid)).contains(rootNode))
+				indegree++;
+		/*for (int i = 0; i < linkable.degree(); i++){
+			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(pid);
+			if (rLinkable.contains(rootNode))
+				indegree++;
+			for (int j = 0; j < rLinkable.degree(); j++)
+				if (((LinkableSN)rLinkable.getNeighbor(j).getProtocol(pid)).contains(rootNode))
+					indegree++;
+		}*/
+		
+		System.out.println(" " + CommonState.getTime() + " " + name + ": " + indegree + " " + indegree2 + " SnInDegree " + snInDegree + " " + set.size());
+		
+		/*Entry[] entry = new Entry[Network.size()];
 		for (int i = 0; i < Network.size(); i++){
 			entry[i] = new Entry();
 		}
@@ -73,7 +121,7 @@ public class DegreeObserver implements Control
 		
 		for (int i = 0; i < Network.size(); i++){
 			System.out.println(" " + CommonState.getTime() + " " + name + ": " + entry[i].inDegree + " SnInDegree " + entry[i].snInDegree + " " + ((float)entry[i].inDegree / (float)entry[i].snInDegree));
-		}
+		}*/
 		
 		return false;
 	}
