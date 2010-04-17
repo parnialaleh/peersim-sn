@@ -31,7 +31,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private final int l;
 	private final int tid;
 	private final int idle;
-	private int lastStep = 1;
+	private int lastStep = 0;
+	private int inDegree = 0;
 
 	private List<CyclonEntry> cache = null;
 
@@ -237,6 +238,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		try { cyclon = (CyclonSN) super.clone(); }
 		catch( CloneNotSupportedException e ) {} // never happens
 		cyclon.cache = new ArrayList<CyclonEntry>();
+		cyclon.lastStep = 0;
+		cyclon.inDegree = 0;
 
 		return cyclon;
 	}
@@ -333,18 +336,36 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		increaseAgeAndSort();
 	}
 
+	private void calculateInDegree(Node node)
+	{
+		LinkableSN linkable = (LinkableSN)node.getProtocol(idle);
+		Set<Node> set = new HashSet<Node>();
+		for (int i = 0; i < linkable.degree(); i++){
+			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(idle);
+			set.add(linkable.getNeighbor(i));
+			for (int j = 0; j < rLinkable.degree(); j++)
+				set.add(rLinkable.getNeighbor(j));
+		}
+		/*for (Node n : set)
+			if (((LinkableSN)n.getProtocol(idle)).contains(node))
+				inDegree++;*/
+		inDegree = set.size();
+	}
+	
 	public void nextCycle(Node node, int protocolID)
 	{
-		int indegree = 0;
-		Linkable linkable = (Linkable)node.getProtocol(idle);
+		if (inDegree == 0)
+			calculateInDegree(node);
+		
+		/*Linkable linkable = (Linkable)node.getProtocol(idle);
 		for (int i = 0; i < linkable.degree(); i++)
 			if (((Linkable)linkable.getNeighbor(i).getProtocol(idle)).contains(node))
-				indegree++;
+				indegree++;*/
 		
-		int step = indegree/200 + 1;
-		lastStep++;
-		if (lastStep%step != 0){
-			//System.err.println("SKIP " + indegree);
+		int step = (int)Math.ceil((double)inDegree/2000.0);
+		lastStep = (lastStep+1)%step;
+		if (lastStep > 0){
+			//System.err.println("SKIP " + CommonState.getTime() + " " + node.getID() + " " + inDegree + " " + (double)inDegree + " " + step + " " + lastStep + " " + ((double)inDegree/2000.0) + " " + Math.ceil((double)inDegree/2000.0));
 			return;
 		}
 		
