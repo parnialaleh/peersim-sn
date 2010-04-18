@@ -362,13 +362,6 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			if (((Linkable)linkable.getNeighbor(i).getProtocol(idle)).contains(node))
 				indegree++;*/
 		
-		int step = (int)Math.ceil((double)inDegree/2000.0);
-		lastStep = (lastStep+1)%step;
-		if (lastStep > 0){
-			//System.err.println("SKIP " + CommonState.getTime() + " " + node.getID() + " " + inDegree + " " + (double)inDegree + " " + step + " " + lastStep + " " + ((double)inDegree/2000.0) + " " + Math.ceil((double)inDegree/2000.0));
-			return;
-		}
-		
 		// 1. Increase by one the age of all neighbors.
 		//increaseAgeAndSort();
 
@@ -383,8 +376,12 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		//    and l − 1 other random neighbors.
 		List<CyclonEntry> nodesToSend = selectNeighbors(l-1, node, ce.n, true);
 
-		// 3. Replace Q’s entry with a new entry of age 0 and with P’s address.
-		nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
+		int step = (int)Math.ceil((double)inDegree/2000.0);
+		lastStep = (lastStep+1)%step;
+		if (lastStep == 0){
+			// 3. Replace Q’s entry with a new entry of age 0 and with P’s address.
+			nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
+		}
 
 		// 4. Send the updated subset to peer Q.
 		CyclonMessage message = new CyclonMessage(node, nodesToSend, true);
