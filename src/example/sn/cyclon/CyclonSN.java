@@ -25,12 +25,14 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private static final String PAR_L = "l";
 	private static final String PAR_TRANSPORT = "transport";
 	private static final String PAR_IDLE = "idle";
+	private static final String PAR_STEP = "stepSize";
 	private static final long TIMEOUT = 2000;
 
 	private int size;
 	private final int l;
 	private final int tid;
 	private final int idle;
+	private final int step;
 	private int lastStep = 0;
 	private int inDegree = 0;
 
@@ -41,6 +43,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		this.l = Configuration.getInt(n + "." + PAR_L);
 		this.tid = Configuration.getPid(n + "." + PAR_TRANSPORT);
 		this.idle = Configuration.getPid(n + "." + PAR_IDLE);
+		this.step = Configuration.getInt(n + "." + PAR_STEP);
 
 		this.size = Configuration.getInt(n + "." + PAR_CACHE);
 		cache = new ArrayList<CyclonEntry>(size);
@@ -356,12 +359,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	{
 		if (inDegree == 0)
 			calculateInDegree(node);
-		
-		/*Linkable linkable = (Linkable)node.getProtocol(idle);
-		for (int i = 0; i < linkable.degree(); i++)
-			if (((Linkable)linkable.getNeighbor(i).getProtocol(idle)).contains(node))
-				indegree++;*/
-		
+
 		// 1. Increase by one the age of all neighbors.
 		//increaseAgeAndSort();
 
@@ -372,16 +370,19 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			return;
 		}
 		ce.removeNode(ce.n, true);
+		
+		List<CyclonEntry> nodesToSend = null;
 
-		//    and l − 1 other random neighbors.
-		List<CyclonEntry> nodesToSend = selectNeighbors(l-1, node, ce.n, true);
-
-		int step = (int)Math.ceil((double)inDegree/2000.0);
-		lastStep = (lastStep+1)%step;
+		int stepSize = (int)Math.ceil((double)inDegree/(double)step);
+		lastStep = (lastStep+1)%stepSize;
 		if (lastStep == 0){
+			//and l − 1 other random neighbors.
+			nodesToSend = selectNeighbors(l-1, node, ce.n, true);
 			// 3. Replace Q’s entry with a new entry of age 0 and with P’s address.
 			nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
 		}
+		else
+			nodesToSend = selectNeighbors(l, node, ce.n, true);
 
 		// 4. Send the updated subset to peer Q.
 		CyclonMessage message = new CyclonMessage(node, nodesToSend, true);
