@@ -81,7 +81,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 		int sup = Math.min(dim, tmp.size());
 		for (int i = 0; i < sup; i++){
 			CyclonEntry ce = cache.get((tmp.remove(CommonState.r.nextInt(tmp.size())).intValue()));
-			ce.removeNode(rnode, selectedAtRequest);
+			ce.removeNode(rnode, selectedAtRequest, false);
 			list.add(ce);
 		}
 
@@ -280,7 +280,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 			System.err.println(node.getID() + ": no Peer");
 			return;
 		}
-		ce.removeNode(ce.n, true);
+		ce.removeNode(ce.n, true, true);
 		
 		//    and l − 1 other random neighbors.
 		List<CyclonEntry> nodesToSend = selectNeighbors(l-1, ce.n, true);

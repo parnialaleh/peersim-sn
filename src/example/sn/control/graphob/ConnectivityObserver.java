@@ -14,12 +14,10 @@ import peersim.util.IncrementalStats;
 
 public class ConnectivityObserver implements Control {
 
-	private static final String PAR_PROT_GOSSIP = "protocol.gossip";
-	private static final String PAR_PROT_IDLE = "protocol.idle";
+	private static final String PAR_PROT_GOSSIP = "protocol";
 
 	protected final String name;
 	protected final int pidGossip;
-	protected final int pidIdle;
 	protected int nodes = 0;
 	protected int[] n;
 	protected static final int WHITE = 0;
@@ -36,13 +34,11 @@ public class ConnectivityObserver implements Control {
 	public ConnectivityObserver(String name) {
 		this.name = name;
 		pidGossip = Configuration.getPid(name + "." + PAR_PROT_GOSSIP);
-		pidIdle = Configuration.getPid(name + "." + PAR_PROT_IDLE);
 	}
 	
-	public ConnectivityObserver(int pidNcast, int pidIdle)
+	public ConnectivityObserver(int pidNcast)
 	{
 		this.pidGossip = pidNcast;
-		this.pidIdle = pidIdle;
 		this.name = "";
 	}
 
@@ -203,14 +199,14 @@ public class ConnectivityObserver implements Control {
 					ug.addEdge(i, node.indexOf(linkable.getNeighbor(j)));
 				}
 			}
-			linkable = (LinkableSN) tmp.getProtocol(pidIdle);
+			/*linkable = (LinkableSN) tmp.getProtocol(pidIdle);
 			nDegree = linkable.degree();
 			for (j = 0; j < nDegree; ++j){
 				nd = (SNNode)linkable.getNeighbor(j);
 				if (((SNNode)nd).isUp()){
 					ug.addEdge(i, node.indexOf(nd));
 				}
-			}
+			}*/
 		}
 	}
 

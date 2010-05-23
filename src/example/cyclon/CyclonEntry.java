@@ -13,6 +13,7 @@ public class CyclonEntry implements Comparable<CyclonEntry>, Comparator<CyclonEn
 	public long timeRemoved;
 	public Node nodeSended;
 	public boolean selectedAtRequest;
+	public boolean selectedAsReceiver;
 
 	public CyclonEntry(){}
 
@@ -57,12 +58,13 @@ public class CyclonEntry implements Comparable<CyclonEntry>, Comparator<CyclonEn
 		this.age++;
 	}
 	
-	public void removeNode(Node nodeSended, boolean selectedAtRequest)
+	public void removeNode(Node nodeSended, boolean selectedAtRequest, boolean selectedAsReceiver)
 	{
 		this.removed = true;
 		this.nodeSended = nodeSended;
 		this.timeRemoved = CommonState.getTime();
 		this.selectedAtRequest = selectedAtRequest;
+		this.selectedAsReceiver = selectedAsReceiver;
 	}
 	
 	public void reuseNode()
@@ -71,5 +73,6 @@ public class CyclonEntry implements Comparable<CyclonEntry>, Comparator<CyclonEn
 		this.nodeSended = null;
 		this.timeRemoved = Long.MAX_VALUE;
 		this.selectedAtRequest = false;
+		this.selectedAsReceiver = false;
 	}
 }
