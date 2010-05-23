@@ -21,6 +21,7 @@ package peersim.reports;
 import java.util.Iterator;
 import java.util.Map;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.util.IncrementalStats;
 
 /**
@@ -117,7 +118,7 @@ public boolean execute()
 		while (it.hasNext()) {
 			stats.add(((Integer) it.next()).intValue());
 		}
-		System.out.println(name + ": " + stats);
+		System.out.println(name + ": " + CommonState.getTime() + " " + stats);
 	}
 	return false;
 }

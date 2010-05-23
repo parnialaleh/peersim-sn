@@ -29,7 +29,7 @@ public class AnalizeFriends extends ConnectivityObserver
 	 */
 	public AnalizeFriends(int pidGossip, int pidIdle, SNNode lnode)
 	{
-		super(pidGossip, pidIdle);
+		super(pidGossip);
 		this.lnode = lnode;
 	}
 
@@ -42,7 +42,7 @@ public class AnalizeFriends extends ConnectivityObserver
 		return nodes;
 	}
 
-	private void createNodeGraphList(int pid, Set<SNNode> node)
+	private void createNodeGraphList(Integer pid, Set<SNNode> node)
 	{
 		int i = 0;
 		int j = 0;
@@ -62,7 +62,7 @@ public class AnalizeFriends extends ConnectivityObserver
 		}
 	}
 	
-	private void createGraph(int pid, List<SNNode> nodeList)
+	private void createGraph(Integer pid, List<SNNode> nodeList)
 	{
 		int i = 0;
 		int j = 0;
@@ -90,7 +90,7 @@ public class AnalizeFriends extends ConnectivityObserver
 	{
 		//create the list of nodes
 		Set<SNNode> nodesSet = new HashSet<SNNode>();
-		createNodeGraphList(pidIdle, nodesSet);
+		createNodeGraphList(null, nodesSet);
 		//createNodeGraphList(pidGossip, nodesSet);
 
 		List<SNNode> nodeList = new ArrayList<SNNode>();
@@ -106,7 +106,7 @@ public class AnalizeFriends extends ConnectivityObserver
 		ft = new int[nodes];
 		node = nodeList.toArray(new SNNode[0]);
 
-		createGraph(pidIdle, nodeList);
+		createGraph(null, nodeList);
 		//createGraph(pidGossip, nodeList);
 	}
 

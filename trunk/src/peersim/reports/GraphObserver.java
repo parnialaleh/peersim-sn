@@ -142,7 +142,6 @@ protected void updateGraph() {
 	    pid != GraphObserver.lastpid )
 	{
 		// we need to update the graphs
-		
 		GraphObserver.lastpid = pid;
 		GraphObserver.time = CommonState.getTime();
 		if( CDState.isCD() ) GraphObserver.ctime = CDState.getCycleT();
