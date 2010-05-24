@@ -193,4 +193,9 @@ public class IdleProtocolSN extends LinkableSN implements Protocol
 		return nodes;
 	}
 
+	@Override
+	public void clearCache() {
+		// TODO Auto-generated method stub
+	}
+
 }

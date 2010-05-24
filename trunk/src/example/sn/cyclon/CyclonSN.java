@@ -16,6 +16,7 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Linkable;
 import peersim.core.Node;
+import peersim.dynamics.NodeInitializer;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
@@ -26,6 +27,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private static final String PAR_TRANSPORT = "transport";
 	private static final String PAR_IDLE = "idle";
 	private static final String PAR_STEP = "stepSize";
+	private static final String PAR_INIT = "init";
+	private static final String PAR_MAX_EMPTY_CYCLES = "emptyCycles";
 	private static final long TIMEOUT = 5000;
 
 	private int size;
@@ -35,10 +38,13 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private final int step;
 	private int lastStep = 0;
 	private int inDegree = 0;
+	private int noPeerCount = 0;
+	private final int maxEmptyCycles;
 	
 	private int NODEID = -1;
 
 	private List<CyclonEntry> cache = null;
+	private final NodeInitializer[] inits;
 
 	public CyclonSN(String n)
 	{
@@ -46,9 +52,19 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		this.tid = Configuration.getPid(n + "." + PAR_TRANSPORT);
 		this.idle = Configuration.getPid(n + "." + PAR_IDLE);
 		this.step = Configuration.getInt(n + "." + PAR_STEP);
+		this.maxEmptyCycles = Configuration.getInt(n + "." + PAR_MAX_EMPTY_CYCLES, 0);
 
 		this.size = Configuration.getInt(n + "." + PAR_CACHE);
 		cache = new ArrayList<CyclonEntry>(size);
+		
+		this.noPeerCount = 0;
+		
+		Object[] tmp = Configuration.getInstanceArray(n + "." + PAR_INIT);
+		inits = new NodeInitializer[tmp.length];
+		for (int i = 0; i < tmp.length; ++i)
+		{
+			inits[i] = (NodeInitializer) tmp[i];
+		}
 	}
 
 	//-------------------------------------------------------------------
@@ -253,6 +269,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		cyclon.cache = new ArrayList<CyclonEntry>();
 		cyclon.lastStep = 0;
 		cyclon.inDegree = 0;
+		
+		this.noPeerCount = 0;
 
 		return cyclon;
 	}
@@ -379,6 +397,13 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	{
 		if (inDegree == 0)
 			calculateInDegree(node);
+		
+		if (maxEmptyCycles > 0 && noPeerCount > maxEmptyCycles){
+			for (int k = 0; k < inits.length; ++k) {
+				inits[k].initialize(node);
+			}
+			noPeerCount = 0;
+		}
 
 		// 1. Increase by one the age of all neighbors.
 		//increaseAgeAndSort();
@@ -388,6 +413,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		if (ce == null){
 			ce = selectNeighborAlsoSended();
 			if (ce == null){
+				noPeerCount++;
 				System.err.println("No Peer " + degree() + " " + ((LinkableSN)node.getProtocol(idle)).degree() + " " + node.getID());
 				return;
 			}
@@ -476,5 +502,11 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		} catch (Exception e){
 			return null;
 		}
+	}
+
+	@Override
+	public void clearCache()
+	{
+		this.cache.clear();
 	}
 }
