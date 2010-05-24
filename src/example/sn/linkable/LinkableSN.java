@@ -35,6 +35,8 @@ public abstract class LinkableSN implements Linkable
 	
 	public abstract Node[] getNodes(Node node);
 	
+	public abstract void clearCache();
+	
 	
 	//----------------------
 	protected NodeEntry[] getFriends(NodeEntry[] neighbors)

@@ -379,6 +379,12 @@ public class NewscastED extends LinkableSN implements EDProtocol, CDProtocol
 		return null;
 	}
 
+	@Override
+	public void clearCache() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }
