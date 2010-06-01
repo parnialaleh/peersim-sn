@@ -98,7 +98,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public Node selectPeer(Node lnode)
 	{
-		List<News> list = ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews();
+		/*List<News> list = ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews();
 
 		AnalizeFriends af = new AnalizeFriends(pidGossip, pidIdle, (SNNode)lnode);
 		List<List<Node>> cluster = af.analize();
@@ -138,8 +138,19 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 		//No messages
 		lastSelectedPeer = -1;
-//		System.out.println("NO MESSAGES CLUSTER");
-		return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
+//		System.out.println("NO MESSAGES CLUSTER");*/
+		
+		List<News> list = ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews();
+		if (list.size() == 0)
+			return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
+		
+		News news = list.get(CommonState.r.nextInt(list.size()));
+		Node n = ((LinkableSN)(lnode.getProtocol(pidGossip))).getFriendPeer(lnode, news.getSourceNode());
+		
+		if (n == null)
+			return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
+		
+		return n;
 	}
 
 	public boolean isInfected()
