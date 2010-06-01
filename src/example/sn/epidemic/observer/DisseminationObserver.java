@@ -73,7 +73,7 @@ public class DisseminationObserver implements Control
 			}
 		}
 
-		//System.out.println(CommonState.getTime() + " " + name + ": " + stats);
+		System.out.println(CommonState.getTime() + " " + name + " stats: " + stats);
 
 		return false;
 	}

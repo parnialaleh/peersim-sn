@@ -18,7 +18,7 @@ import peersim.graph.GraphAlgorithms;
 import peersim.graph.NeighbourListGraph;
 import peersim.util.IncrementalStats;
 
-public class WealConnectivityObserver implements Control {
+public class WeakConnectivityObserver implements Control {
 
 	class Point implements Comparator<Point>
 	{
@@ -45,18 +45,9 @@ public class WealConnectivityObserver implements Control {
 	private GraphAlgorithms ga = new GraphAlgorithms();
 	private Comparator<Point> c = new Point(null, 0);
 
-	public WealConnectivityObserver(String name) {
+	public WeakConnectivityObserver(String name) {
 		this.name = name;
 		pidGossip = Configuration.getPid(name + "." + PAR_PROT_GOSSIP);
-	}
-
-	private int indexOf(Node n, List<Point> indexes)
-	{
-		for (int i = 0; i < indexes.size(); i++)
-			if (indexes.get(i).n.equals(n))
-				return indexes.get(i).index;
-
-		return -1;
 	}
 
 	private Graph graphInit()

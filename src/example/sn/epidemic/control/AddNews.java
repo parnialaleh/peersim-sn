@@ -19,7 +19,7 @@ public class AddNews implements Control
 {
 	private static final String PAR_PROT_NEWS_MANAGER = "protocol.newsManager";
 	private static final String PAR_PROT_IDLE = "protocol.idle";
-	private static final String PAR_PROT_NEWSCAST = "protocol.newscast";
+	private static final String PAR_PROT_NEWSCAST = "protocol.gossip";
 	private static final String PAR_FRIENDSHIP = "friendshipNo";
 	private static final String PAR_STATUS_CHANGE = "statusChangeNo";
 	private static final String PAR_COMMENT = "commentNo";
