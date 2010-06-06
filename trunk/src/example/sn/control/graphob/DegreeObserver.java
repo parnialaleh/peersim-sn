@@ -3,7 +3,6 @@ package example.sn.control.graphob;
 import java.util.HashSet;
 import java.util.Set;
 
-import example.sn.epidemic.control.AddNews;
 import example.sn.linkable.LinkableSN;
 import example.sn.node.SNNode;
 import peersim.config.Configuration;
@@ -11,6 +10,7 @@ import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
+import peersim.util.IncrementalStats;
 
 public class DegreeObserver implements Control
 {
@@ -66,44 +66,14 @@ public class DegreeObserver implements Control
 
 	public boolean execute()
 	{
-		int indegree = 0;
-		Node rootNode = Network.get(indexOf(AddNews.getRoot()));
+		IncrementalStats is = new IncrementalStats();
+		
+		for (int i = 0 ; i < Network.size(); i++)
+			calculeteInDegree(Network.get(i), is);
+		
+		System.out.println(" " + CommonState.getTime() + " " + name + "stats: " + is);
 
-		int indegree2 = 0;
-		int snInDegree = 0;
-		for (int i = 0; i < Network.size(); i++){
-			if (((LinkableSN)Network.get(i).getProtocol(idle)).contains(rootNode))
-				snInDegree++;
-			if (Network.get(i).isUp())
-				if (((LinkableSN)Network.get(i).getProtocol(pid)).contains(rootNode))
-					indegree2++;
-
-		}
-
-		LinkableSN linkable = (LinkableSN)rootNode.getProtocol(idle);
-		Set<Node> set = new HashSet<Node>();
-		for (int i = 0; i < linkable.degree(); i++){
-			if (linkable.getNeighbor(i).isUp())
-				set.add(linkable.getNeighbor(i));
-			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(idle);
-			for (int j = 0; j < rLinkable.degree(); j++)
-				if (rLinkable.getNeighbor(j).isUp())
-					set.add(rLinkable.getNeighbor(j));
-		}
-		for (Node n : set)
-			if (((LinkableSN)n.getProtocol(pid)).contains(rootNode))
-				indegree++;
-		/*for (int i = 0; i < linkable.degree(); i++){
-			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(pid);
-			if (rLinkable.contains(rootNode))
-				indegree++;
-			for (int j = 0; j < rLinkable.degree(); j++)
-				if (((LinkableSN)rLinkable.getNeighbor(j).getProtocol(pid)).contains(rootNode))
-					indegree++;
-		}*/
-
-		System.out.println(" " + CommonState.getTime() + " " + name + ": " + indegree + " " + indegree2 + " SnInDegree " + snInDegree + " " + set.size());
-
+		
 		/*Entry[] entry = new Entry[Network.size()];
 		for (int i = 0; i < Network.size(); i++){
 			entry[i] = new Entry();
@@ -128,6 +98,43 @@ public class DegreeObserver implements Control
 		}*/
 
 		return false;
+	}
+	
+	private void calculeteInDegree(Node rootNode, IncrementalStats is)
+	{
+		//Node rootNode = Network.get(indexOf(AddNews.getRoot()));
+		int indegree = 0;
+		int snInDegree = 0;
+		for (int i = 0; i < Network.size(); i++){
+			if (((LinkableSN)Network.get(i).getProtocol(idle)).contains(rootNode))
+				snInDegree++;
+		}
+
+		LinkableSN linkable = (LinkableSN)rootNode.getProtocol(idle);
+		Set<Node> set = new HashSet<Node>();
+		for (int i = 0; i < linkable.degree(); i++){
+			if (linkable.getNeighbor(i).isUp())
+				set.add(linkable.getNeighbor(i));
+			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(idle);
+			for (int j = 0; j < rLinkable.degree(); j++)
+				if (rLinkable.getNeighbor(j).isUp())
+					set.add(rLinkable.getNeighbor(j));
+		}
+		for (Node n : set)
+			if (((LinkableSN)n.getProtocol(pid)).contains(rootNode))
+				indegree++;
+		/*for (int i = 0; i < linkable.degree(); i++){
+			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(pid);
+			if (rLinkable.contains(rootNode))
+				indegree++;
+			for (int j = 0; j < rLinkable.degree(); j++)
+				if (((LinkableSN)rLinkable.getNeighbor(j).getProtocol(pid)).contains(rootNode))
+					indegree++;
+		}*/
+		
+		is.add(indegree);
+
+		System.out.println(" " + CommonState.getTime() + " " + name + ": simulDegree: " + indegree + " SnInDegree: " + snInDegree + " indegree: " + set.size());
 	}
 
 }
