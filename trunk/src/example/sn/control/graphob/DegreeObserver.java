@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import example.sn.linkable.LinkableSN;
-import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -55,14 +54,14 @@ public class DegreeObserver implements Control
 		this.name = prefix;
 	}
 
-	private int indexOf(long nodeRealID)
+	/*private int indexOf(long nodeRealID)
 	{
 		for (int i = 0; i < Network.size(); i++)
 			if (((SNNode)Network.get(i)).getRealID() == nodeRealID)
 				return i;
 
 		return -1;
-	}
+	}*/
 
 	public boolean execute()
 	{

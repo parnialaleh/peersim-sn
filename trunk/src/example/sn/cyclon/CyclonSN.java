@@ -376,7 +376,10 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		if (event instanceof Integer){
 			if (inDegree == 0)
 				calculateInDegree(node);
-			EDSimulator.add(c.period * (long)((double)inDegree/(double)step), (Integer) event, node, pid);
+			double time = (double)inDegree/(double)step;
+			if (time < 0.4)
+				time = 0.4;
+			EDSimulator.add((long)((double)c.period * time), (Integer) event, node, pid);
 
 			activeThread(node, pid);
 		}
@@ -471,8 +474,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			is.add(totalReceived);
 			System.out.println(" " + CommonState.getTime() + " node: " + node.getID() + " indegree: " + inDegree + " receivedCycle: " + totalReceived + " is: " + is);
 		}
-		
-		is = new IncrementalStats();	
+		else
+			is = new IncrementalStats();
 		noPeerCount++;
 		totalReceived = 0;
 	}
@@ -635,7 +638,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		if (ce == null){
 			ce = selectNeighborAlsoSended();
 			if (ce == null){
-				System.err.println("No Peer " + degree() + " " + ((LinkableSN)node.getProtocol(idle)).degree() + " " + node.getID());
+				//System.err.println("No Peer " + degree() + " " + ((LinkableSN)node.getProtocol(idle)).degree() + " " + node.getID());
 				return;
 			}
 		}
