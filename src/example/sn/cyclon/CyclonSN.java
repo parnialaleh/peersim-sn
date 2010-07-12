@@ -92,6 +92,9 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private IncrementalStats is = null;
 	private int totalReceived = 0;
 	
+	private final String name;
+	private int lastStep = 0;
+	
 	public CyclonSN(String n)
 	{
 		c = new CommonData();
@@ -106,6 +109,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		this.size = Configuration.getInt(n + "." + PAR_CACHE);
 		cache = new ArrayList<CyclonEntry>(size);
 
+		this.name = n;
 		this.noPeerCount = 0;
 		this.totalReceived = 0;
 
@@ -376,10 +380,11 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		if (event instanceof Integer){
 			if (inDegree == 0)
 				calculateInDegree(node);
-			double time = (double)inDegree/(double)step;
-			if (time < 0.4)
-				time = 0.4;
-			EDSimulator.add((long)((double)c.period * time), (Integer) event, node, pid);
+			//double time = (double)inDegree/(double)step;
+			//if (time < 1)
+			//	time = 1;
+			//System.out.println((long)((double)c.period * time) + " " + inDegree + " " + step);
+			//EDSimulator.add((long)((double)c.period * time), (Integer) event, node, pid);
 
 			activeThread(node, pid);
 		}
@@ -387,7 +392,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			passiveThread(node, pid, event);
 	}
 
-	private Graph graphInit(Node node)
+	private Graph grap hInit(Node node)
 	{
 		/*NeighbourListGraph g = new NeighbourListGraph(true);
 		Node n = null;pidGossip
@@ -472,7 +477,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	{
 		if (is != null){
 			is.add(totalReceived);
-			System.out.println(" " + CommonState.getTime() + " node: " + node.getID() + " indegree: " + inDegree + " receivedCycle: " + totalReceived + " is: " + is);
+			//System.out.println(" " + CommonState.getTime() + " " + name + " node: " + node.getID() + " indegree: " + inDegree + " receivedCycle: " + totalReceived + " is: " + is);
 		}
 		else
 			is = new IncrementalStats();
@@ -656,7 +661,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		// 3. Replace Q’s entry with a new entry of age 0 and with P’s address.
 		nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
 
-		/*int stepSize = (int)Math.ceil((double)inDegree/(double)step);
+		int stepSize = (int)Math.ceil((double)inDegree/(double)step);
 		lastStep = (lastStep+1)%stepSize;
 		if (lastStep == 0){
 			//and l − 1 other random neighbors.
@@ -665,7 +670,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			nodesToSend.add(0, new CyclonEntry(node, CommonState.getTime()));
 		}
 		else
-			nodesToSend = selectNeighbors(l, node, ce.n, true);*/
+			nodesToSend = selectNeighbors(l, node, ce.n, true);
 
 		// 4. Send the updated subset to peer Q.
 		CyclonMessage message = new CyclonMessage(node, nodesToSend, true);
