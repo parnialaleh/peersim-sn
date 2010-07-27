@@ -68,7 +68,7 @@ public class DegreeObserver implements Control
 		IncrementalStats is = new IncrementalStats();
 		
 		for (int i = 0 ; i < Network.size(); i++)
-			System.out.println(" " + CommonState.getTime() + " " + name + ": " + calculeteInDegree(Network.get(i), is));
+			calculeteInDegree(Network.get(i), is);
 		
 		System.out.println(" " + CommonState.getTime() + " " + name + "stats: " + is);
 
@@ -99,7 +99,7 @@ public class DegreeObserver implements Control
 		return false;
 	}
 	
-	private String calculeteInDegree(Node rootNode, IncrementalStats is)
+	private void calculeteInDegree(Node rootNode, IncrementalStats is)
 	{
 		//Node rootNode = Network.get(indexOf(AddNews.getRoot()));
 		int indegree = 0;
@@ -133,7 +133,7 @@ public class DegreeObserver implements Control
 		
 		is.add(indegree);
 
-		return ("simulDegree " + indegree + " SnInDegree " + snInDegree + " indegree " + set.size());
+		System.out.println(" " + CommonState.getTime() + " " + name + ": simulDegree " + indegree + " SnInDegree " + snInDegree + " indegree " + set.size());
 	}
 
 }
