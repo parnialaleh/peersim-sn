@@ -38,7 +38,7 @@ public class IdleProtocolSN extends LinkableSN implements Protocol
 	public boolean contains(Node n)
 	{
 		for (int i = 0; i < len && neighbors[i] != null; i++) {
-			if (neighbors[i].n == n)
+			if (neighbors[i].n.getID() == n.getID())
 				return true;
 		}
 		return false;
