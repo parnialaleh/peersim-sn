@@ -1,6 +1,8 @@
 package example.sn.epidemic.control;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import peersim.config.Configuration;
@@ -13,7 +15,6 @@ import example.sn.epidemic.message.NewsComment;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.epidemic.message.NewsStatusChange;
 import example.sn.linkable.LinkableSN;
-import example.sn.node.SNNode;
 
 public class AddNews implements Control
 {
@@ -44,26 +45,42 @@ public class AddNews implements Control
 		//this.root = Configuration.getLong(n + "." + PAR_ROOT);
 	}
 	
-	private int indexOf(long nodeRealID)
+	/*private int indexOf(long nodeRealID)
 	{
 		for (int i = 0; i < Network.size(); i++)
 			if (((SNNode)Network.get(i)).getRealID() == nodeRealID)
 				return i;
 		
 		return -1;
+	}*/
+	
+	private int getUpRandomNode(List<Node> network)
+	{
+		int i = CommonState.r.nextInt(network.size());
+		while (network.size() > 0 && Network.get(i).isUp() == false){
+			network.remove(i);
+			i = CommonState.r.nextInt(network.size());
+		}
+		
+		return i;
 	}
 
 
 	public boolean execute()
 	{		
 		final int size = Network.size();
+		List<Node> network = new ArrayList<Node>();
 		Set<Integer> s = new HashSet<Integer>();
-
+		
+		for (int i = 0; i < size; i++)
+			network.add(Network.get(i));
+		
 		int i;
 		NewsManager newsManager;
 		while (s.size() < statusChangeNo){
 			//i = CommonState.r.nextInt(size);
-			i = indexOf(root);
+			i = getUpRandomNode(network);
+			//i = indexOf(root);
 			if (!s.contains(i) && Network.get(i).isUp()){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				newsManager.addNews(new NewsStatusChange(Network.get(i)), Network.get(i));
@@ -74,7 +91,7 @@ public class AddNews implements Control
 		s = new HashSet<Integer>();
 		while (s.size() < commentNo){
 			//i = CommonState.r.nextInt(size);
-			i = indexOf(root);
+			i = getUpRandomNode(network);
 			if (!s.contains(i) && Network.get(i).isUp()){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				newsManager.addNews(new NewsComment(Network.get(i),
@@ -87,7 +104,7 @@ public class AddNews implements Control
 		LinkableSN idle;
 		LinkableSN newscast;
 		while (s.size() < friendshipNo){
-			i = CommonState.r.nextInt(size);
+			i = getUpRandomNode(network);
 			if (!s.contains(i)){
 				idle = (LinkableSN)Network.get(i).getProtocol(pidIdle);
 				newscast = (LinkableSN)Network.get(i).getProtocol(pidNewscast);
