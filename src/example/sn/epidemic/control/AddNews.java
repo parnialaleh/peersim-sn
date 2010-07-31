@@ -81,7 +81,7 @@ public class AddNews implements Control
 			//i = CommonState.r.nextInt(size);
 			i = getUpRandomNode(network);
 			//i = indexOf(root);
-			if (!s.contains(i) && Network.get(i).isUp()){
+			if (!s.contains(i) && Network.get(i).isUp() && ((LinkableSN)Network.get(i).getProtocol(pidIdle)).degree() > 20){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				newsManager.addNews(new NewsStatusChange(Network.get(i)), Network.get(i));
 				s.add(i);

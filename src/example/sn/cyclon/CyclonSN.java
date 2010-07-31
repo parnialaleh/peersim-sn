@@ -119,21 +119,48 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		}
 	}
 
-	private boolean isInterestingNode(CyclonEntry entry, Node lnode, Node rnode)
+	private int isInterestingNode(CyclonEntry entry, Node lnode, Node rnode)
 	{
+		/*Linkable lNodeIdleProtocol = (Linkable)lnode.getProtocol(idle);
 		Linkable rNodeIdleProtocol = (Linkable)rnode.getProtocol(idle);
 
 		if (entry.removed)
 			return false;
 		
-		if (rNodeIdleProtocol.contains(entry.n))
+		boolean isRNodeFriend = false;
+		boolean isEntryFriend = false;
+		if (lNodeIdleProtocol.contains(rnode))
+			isRNodeFriend = true;
+		if (lNodeIdleProtocol.contains(entry.n))
+			isEntryFriend = true;
+		
+		if (isRNodeFriend && isEntryFriend)
 			return true;
+		
+		if (isRNodeFriend)
+			return (rNodeIdleProtocol.contains(entry.n));
+		else
+			for (int i = 0; i < lNodeIdleProtocol.degree(); i++)
+				if (((Linkable)lNodeIdleProtocol.getNeighbor(i).getProtocol(idle)).contains(entry.n) &&
+						((Linkable)lNodeIdleProtocol.getNeighbor(i).getProtocol(idle)).contains(rnode))
+					return true;
+		
+		if (isEntryFriend)
+			return ((Linkable)entry.n.getProtocol(idle)).contains(rnode);*/
+		
+        Linkable rNodeIdleProtocol = (Linkable)rnode.getProtocol(idle);
 
-		for (int i = 0; i < rNodeIdleProtocol.degree(); i++)
-			if (((Linkable)rNodeIdleProtocol.getNeighbor(i).getProtocol(idle)).contains(entry.n))
-				return true;
+        if (entry.removed)
+                return 0;
+        
+        if (rNodeIdleProtocol.contains(entry.n))
+                return 1;
 
-		return false;
+        for (int i = 0; i < rNodeIdleProtocol.degree(); i++)
+                if (((Linkable)rNodeIdleProtocol.getNeighbor(i).getProtocol(idle)).contains(entry.n))
+                        return 2;
+
+        return 0;
 	}
 
 	/**
@@ -145,13 +172,17 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private List<CyclonEntry> initList(Node lnode, Node rnode)
 	{
 		List<CyclonEntry> list = new ArrayList<CyclonEntry>();
+		int type = 0;
 		for (CyclonEntry ce : cache){
 			if (ce.removed && (CommonState.getTime() - ce.timeRemoved) >= TIMEOUT)
 				ce.reuseNode();
 			//ce.n is a friend of rNode or rNode is a friend of mine and ce.n is my friend
 			//if ((rNodeIdleProtocol.contains(ce.n) || (isRNodeFriend && lNodeIdleProtocol.contains(ce.n))) && !ce.removed)
-			if (isInterestingNode(ce, lnode, rnode))
-				list.add(ce);
+			if ((type = isInterestingNode(ce, lnode, rnode)) > 0)
+				if (type == 1)
+					list.add(0, ce);
+				else
+					list.add(ce);
 		}
 
 		return list;
@@ -172,13 +203,14 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 
 		if (lnode.getID() == NODEID)
 			System.err.print("list to send size " + list.size());
-		
+
 		while (list.size() > dim)
-			list.remove(CommonState.r.nextInt(list.size()));
+			//list.remove(CommonState.r.nextInt(list.size()));
+			list.remove(list.size()-1);
 
 		for (CyclonEntry ce : list)
 			ce.removeNode(rnode, selectedAtRequest, false);
-		
+
 		if (lnode.getID() == NODEID)
 			System.err.println("->" + list.size());
 
@@ -208,7 +240,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 		for (int i = cache.size()-1 ; i >= 0; i--)
 			if (cache.get(i).removed && cache.get(i).nodeSended.equals(rnode) && cache.get(i).selectedAtRequest == selectedAtRequest)
 				return i;
-		
+
 		for (int i = cache.size()-1 ; i >= 0; i--)
 			if (cache.get(i).removed)
 				return i;
@@ -343,9 +375,9 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			CyclonMessage msg = new CyclonMessage(node, nodesToSend, false);
 			Transport tr = (Transport) node.getProtocol(tid);
 			tr.send(node, message.sender, msg, pid);
-			
+
 			//if (nodesToSend.size() == 0)
-				//System.err.println("PROCESSEVENT " + node.getID() + "->" + message.sender.getID());
+			//System.err.println("PROCESSEVENT " + node.getID() + "->" + message.sender.getID());
 
 			if (node.getID() == NODEID){
 				System.err.println("------------------ SEND ---------------------------");
@@ -420,7 +452,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	{
 		if (inDegree == 0)
 			calculateInDegree(node);
-		
+
 		if (countContact){
 			System.out.println(" " + CommonState.getTime() + " contact: " + receivedContats + " indegree " + inDegree);
 			receivedContats = 0;
@@ -457,7 +489,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 			System.err.println(node.getID() + "->" + ce.n.getID());
 
 		List<CyclonEntry> nodesToSend = null;
-		
+
 		//and l − 1 other random neighbors.
 		nodesToSend = selectNeighbors(l-1, node, ce.n, true);
 		// 3. Replace Q’s entry with a new entry of age 0 and with P’s address.
