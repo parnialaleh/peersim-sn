@@ -4,6 +4,7 @@ import java.util.List;
 
 import example.sn.NewsManager;
 import example.sn.epidemic.message.News;
+import example.sn.epidemic.message.NewsStatusChange;
 import example.sn.linkable.LinkableSN;
 import example.newscast.NodeEntry;
 import example.sn.node.SNNode;
@@ -21,7 +22,7 @@ public class DisseminationObserver implements Control
 	//private static final String PAR_PROTOCOL_GOSSIP = "protocol.gossip";
 	private static final String PAR_PROTOCOL_IDLE = "protocol.idle";
 
-	
+
 	private final int pidNews;
 	//private final int pidGossip;
 	private final int pidIdle;
@@ -61,7 +62,7 @@ public class DisseminationObserver implements Control
 				News nw = news.get(j);
 				know = 0;
 				friendsNo = 0;
-				
+
 				friends = idle.getFriends(n, n);
 				for (NodeEntry ne : friends){
 					if (ne.n.isUp()){
@@ -69,15 +70,18 @@ public class DisseminationObserver implements Control
 							know++;
 						friendsNo++;
 					}
-					fFriends = ((LinkableSN)ne.n.getProtocol(pidIdle)).getFriends(ne.n, ne.n);	
-					for (NodeEntry ne1 : fFriends)
-						if (ne1.n.isUp()){
-							if (((NewsManager)ne1.n.getProtocol(pidNews)).contains(nw))
-								know++;
-							friendsNo++;
-						}
+
+					if (!(nw instanceof NewsStatusChange)){
+						fFriends = ((LinkableSN)ne.n.getProtocol(pidIdle)).getFriends(ne.n, ne.n);	
+						for (NodeEntry ne1 : fFriends)
+							if (ne1.n.isUp()){
+								if (((NewsManager)ne1.n.getProtocol(pidNews)).contains(nw))
+									know++;
+								friendsNo++;
+							}
+					}
 				}
-				
+
 				System.out.println(CommonState.getTime() + " " + name + ": message " + j + " node " + n.getID() + " " + ((SNNode)n).getRealID() + " nodes " + friendsNo + " know " + know + " perc " + ((double)know/(double)friendsNo));
 				stats.add((double)know / (double)friendsNo);
 			}
