@@ -28,19 +28,19 @@ public class NewsManager implements EDProtocol
 {
 	private static final String PAR_IDLE_MANAGER = "idle";
 	private static final String PAR_EPIDEMIC = "epidemic";
-	
+
 	protected final int pidIdle;
 	protected final int pidEpidemic;
-	
+
 	private List<News> news = null;
-	
+
 	public NewsManager(String n)
 	{
 		this.pidIdle = Configuration.getPid(n + "." + PAR_IDLE_MANAGER);
 		this.pidEpidemic = Configuration.getPid(n + "." + PAR_EPIDEMIC);
 		this.news = new ArrayList<News>();
 	}
-	
+
 	public Object clone()
 	{
 		NewsManager nm = null;
@@ -50,22 +50,22 @@ public class NewsManager implements EDProtocol
 
 		return nm;
 	}
-	
+
 	public boolean contains(News n)
 	{
 		return news.contains(n);
 	}
-	
+
 
 	public void addNews(News news, Node n)
 	{
 		this.news.add(news);
 		if (news instanceof NewsFriendship)
 			((NewscastED)n.getProtocol(pidIdle)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
-		
+
 		((EpidemicNews)n.getProtocol(pidEpidemic)).setInfected(true);
 	}
-	
+
 	/**
 	 * 
 	 * @return the whole list of messages
@@ -74,7 +74,7 @@ public class NewsManager implements EDProtocol
 	{
 		return news;
 	}
-	
+
 	private boolean isInterestingNews(News n, Node lnode, Node rnode)
 	{
 		LinkableSN lSourceNode =  (LinkableSN)n.getSourceNode().getProtocol(pidIdle);
@@ -85,14 +85,14 @@ public class NewsManager implements EDProtocol
 			//rnode amico di sourceNode o destNode
 			if ((lSourceNode.containsAsFriend(null, rnode)) || (lDestNode.containsAsFriend(null, rnode)))
 				return true;
-			
+
 			//rnode amico di un amico di sourceNode
 			for (int i = 0; i < lSourceNode.degree(); i++){
 				linkable =  (LinkableSN)lSourceNode.getNeighbor(i).getProtocol(pidIdle);
 				if ((linkable.containsAsFriend(null, rnode)) || (linkable.containsAsFriend(null, rnode)))
 					return true;
 			}
-			
+
 			//rnode amico di un amico di destNode
 			for (int i = 0; i < lDestNode.degree(); i++){
 				linkable =  (LinkableSN)lDestNode.getNeighbor(i).getProtocol(pidIdle);
@@ -104,10 +104,10 @@ public class NewsManager implements EDProtocol
 			//rnode amico di sourceNode o destNode
 			if ((lSourceNode.containsAsFriend(null, rnode)) || (lDestNode.containsAsFriend(null, rnode)))
 				return true;
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * 
 	 * @param lnode
@@ -117,25 +117,25 @@ public class NewsManager implements EDProtocol
 	public List<News> getNews(Node lnode, Node rnode)
 	{
 		List<News> list = new ArrayList<News>();
-		
-//		System.err.println(((SNNode)lnode).getRealID() + " " + ((SNNode)rnode).getRealID());
-		
+
+		//		System.err.println(((SNNode)lnode).getRealID() + " " + ((SNNode)rnode).getRealID());
+
 		for (News n: news)
-//			if (((LinkableSN)n.getSourceNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode) ||
-					//((LinkableSN)n.getDestNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode))
+			//			if (((LinkableSN)n.getSourceNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode) ||
+			//((LinkableSN)n.getDestNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode))
 			if (isInterestingNews(n, lnode, rnode))
 				list.add(n);
-				/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
+		/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
 				list.add(n);*/
-		
-//		if (((SNNode)lnode).getRealID() == 1455300416)
-//			System.err.println(list.size() + " " + ((SNNode)rnode).getRealID());
-		
+
+		//		if (((SNNode)lnode).getRealID() == 1455300416)
+		//			System.err.println(list.size() + " " + ((SNNode)rnode).getRealID());
+
 		//System.err.println("SEND SIZE " + list.size());
-		
+
 		return list;
 	}
-	
+
 	/**
 	 * 
 	 * @param lnode
@@ -144,19 +144,19 @@ public class NewsManager implements EDProtocol
 	public List<News> getOwnNews(Node lnode)
 	{
 		List<News> list = new ArrayList<News>();
-		
+
 		for (News n: news)
 			if (n.getSourceNode().getID() == lnode.getID() || n.getDestNode().getID() == lnode.getID())
 				list.add(n);
-						
+
 		return list;
 	}
-	
+
 	public News getNews(int index)
 	{
 		return this.news.get(index);
 	}
-	
+
 	public boolean merge(List<News> messages)
 	{
 		boolean addSomething = false;
@@ -171,5 +171,5 @@ public class NewsManager implements EDProtocol
 	}
 
 	public void processEvent(Node node, int pid, Object event) {}
-	
+
 }
