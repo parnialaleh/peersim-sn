@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import example.sn.EpidemicNews;
 import example.sn.node.SNNode;
 
 import peersim.config.Configuration;
@@ -17,14 +18,17 @@ public class DynamicSocialNetwork implements Control
 {
 	private static final String PAR_MIN_NETWORK_SIZE = "minsize";
 	private static final String PAR_MAX_NETWORK_SIZE = "maxsize";
+	private static final String PAR_NEWS_MANAGER = "news";
 	
 	private final int minNetworkSize;
 	private final int maxNetworkSize;
+	private final int pidNews;
 	
 	public DynamicSocialNetwork(String n)
 	{
 		this.minNetworkSize = Configuration.getInt(n + "." + PAR_MIN_NETWORK_SIZE);
 		this.maxNetworkSize = Configuration.getInt(n + "." + PAR_MAX_NETWORK_SIZE);
+		this.pidNews = Configuration.getPid(n + "." + PAR_NEWS_MANAGER);
 	}
 	
 	private void add(int n, List<Node> offLineNodes)
@@ -36,6 +40,7 @@ public class DynamicSocialNetwork implements Control
 			i = CommonState.r.nextInt(size);
 			if (!s.contains(i)){
 				((SNNode)offLineNodes.get(i)).setOnline(true);
+				((EpidemicNews)((SNNode)offLineNodes.get(i)).getProtocol(pidNews)).setInfected(true);
 				s.add(i);
 			}
 		}
