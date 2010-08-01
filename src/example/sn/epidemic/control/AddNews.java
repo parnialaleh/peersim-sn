@@ -44,16 +44,16 @@ public class AddNews implements Control
 		this.commentNo = Configuration.getInt(n + "." + PAR_COMMENT);
 		//this.root = Configuration.getLong(n + "." + PAR_ROOT);
 	}
-	
+
 	/*private int indexOf(long nodeRealID)
 	{
 		for (int i = 0; i < Network.size(); i++)
 			if (((SNNode)Network.get(i)).getRealID() == nodeRealID)
 				return i;
-		
+
 		return -1;
 	}*/
-	
+
 	private int getUpRandomNode(List<Node> network)
 	{
 		int i = CommonState.r.nextInt(network.size());
@@ -61,7 +61,7 @@ public class AddNews implements Control
 			network.remove(i);
 			i = CommonState.r.nextInt(network.size());
 		}
-		
+
 		return i;
 	}
 
@@ -71,10 +71,10 @@ public class AddNews implements Control
 		final int size = Network.size();
 		List<Node> network = new ArrayList<Node>();
 		Set<Integer> s = new HashSet<Integer>();
-		
+
 		for (int i = 0; i < size; i++)
 			network.add(Network.get(i));
-		
+
 		int i;
 		NewsManager newsManager;
 		while (s.size() < statusChangeNo){
@@ -87,16 +87,18 @@ public class AddNews implements Control
 				s.add(i);
 			}
 		}
-		
+
 		s = new HashSet<Integer>();
 		while (s.size() < commentNo){
 			//i = CommonState.r.nextInt(size);
 			i = getUpRandomNode(network);
 			if (!s.contains(i) && Network.get(i).isUp()){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
-				newsManager.addNews(new NewsComment(Network.get(i),
-						((LinkableSN)Network.get(i).getProtocol(pidIdle)).getFriendPeer(Network.get(i), Network.get(i))), Network.get(i));
-				s.add(i);
+				Node rnode = ((LinkableSN)Network.get(i).getProtocol(pidIdle)).getFriendPeer(Network.get(i), Network.get(i));
+				if (rnode != null){
+					newsManager.addNews(new NewsComment(Network.get(i), rnode), Network.get(i));
+					s.add(i);
+				}
 			}
 		}
 
@@ -120,7 +122,7 @@ public class AddNews implements Control
 
 		return false;
 	}
-	
+
 	public static long getRoot() {
 		return root;
 	}
