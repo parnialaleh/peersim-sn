@@ -68,7 +68,8 @@ public class DegreeObserver implements Control
 		IncrementalStats is = new IncrementalStats();
 		
 		for (int i = 0 ; i < Network.size(); i++)
-			calculeteInDegree(Network.get(i), is);
+			if (Network.get(i).isUp())
+				calculeteInDegree(Network.get(i), is);
 		
 		System.out.println(" " + CommonState.getTime() + " " + name + "stats: " + is);
 
