@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import example.sn.linkable.LinkableSN;
+import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -59,7 +60,7 @@ public class WeakConnectivityObserver implements Control {
 		List<Point> indexes = new ArrayList<Point>();
 		for (int i = 0; i < Network.size(); i++){
 			n = Network.get(i);
-			if (n.isUp())
+			if (((SNNode)n).isOnline())
 				indexes.add(new Point(n, g.addNode(n))); 
 		}
 		
@@ -69,7 +70,7 @@ public class WeakConnectivityObserver implements Control {
 			n = indexes.get(i).n;
 			l = (LinkableSN)n.getProtocol(pidGossip);
 			for (int j = 0; j < l.degree(); j++)
-				if (l.getNeighbor(j).isUp())
+				if (((SNNode)l.getNeighbor(j)).isOnline())
 					g.setEdge(indexes.get(i).index, Collections.binarySearch(indexes, new Point(l.getNeighbor(j), 0), c)); //indexOf(l.getNeighbor(j), indexes));
 		}
 

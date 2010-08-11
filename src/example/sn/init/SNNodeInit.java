@@ -33,9 +33,9 @@ public class SNNodeInit implements NodeInitializer
 	{
 		LinkableSN idle = (LinkableSN)node.getProtocol(pIdle);
 		LinkableSN idle2 = null;
-		Linkable gossip = (Linkable)node.getProtocol(pid);
+		LinkableSN gossip = (LinkableSN)node.getProtocol(pid);
 
-		idle.clearCache();
+		gossip.clearCache();
 		
 		Set<Node> set = new HashSet<Node>();
 		for (int j = 0; j < idle.degree(); j++){

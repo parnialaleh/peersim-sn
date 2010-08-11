@@ -7,6 +7,7 @@ import java.util.List;
 import org.w3c.dom.stylesheets.LinkStyle;
 
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -107,15 +108,9 @@ public class NewsManager implements EDProtocol
 
 		return false;
 	}
-
-	/**
-	 * 
-	 * @param lnode
-	 * @param rnode
-	 * @return the list of messages of lnode where the author is a friend in common with rnode
-	 */
+	
 	public List<News> getNews(Node lnode, Node rnode)
-	{
+	{		
 		List<News> list = new ArrayList<News>();
 
 		//		System.err.println(((SNNode)lnode).getRealID() + " " + ((SNNode)rnode).getRealID());
@@ -123,8 +118,41 @@ public class NewsManager implements EDProtocol
 		for (News n: news)
 			//			if (((LinkableSN)n.getSourceNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode) ||
 			//((LinkableSN)n.getDestNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode))
-			if (isInterestingNews(n, lnode, rnode))
+			if (isInterestingNews(n, lnode, rnode)){
 				list.add(n);
+			}
+		/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
+				list.add(n);*/
+
+		//		if (((SNNode)lnode).getRealID() == 1455300416)
+		//			System.err.println(list.size() + " " + ((SNNode)rnode).getRealID());
+
+		//System.err.println("SEND SIZE " + list.size());
+
+		return list;
+	}
+
+	/**
+	 * 
+	 * @param lnode
+	 * @param rnode
+	 * @return the list of messages of lnode where the author is a friend in common with rnode
+	 */
+	public List<News> getNews(Node lnode, Node rnode, int pid)
+	{
+		NewsManager rNews = (NewsManager)rnode.getProtocol(pid);
+		
+		List<News> list = new ArrayList<News>();
+
+		//		System.err.println(((SNNode)lnode).getRealID() + " " + ((SNNode)rnode).getRealID());
+
+		for (News n: news)
+			//			if (((LinkableSN)n.getSourceNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode) ||
+			//((LinkableSN)n.getDestNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode))
+			if (isInterestingNews(n, lnode, rnode) && !rNews.contains(n)){
+				System.out.println("OBSERVER " + n.getSourceNode().getID() + " " + n.getDestNode().getID() + " " + n.getEventTime() + " " + rnode.getID());
+				list.add(n);
+			}
 		/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))
 				list.add(n);*/
 

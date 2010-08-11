@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import example.sn.linkable.LinkableSN;
+import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -68,7 +69,7 @@ public class DegreeObserver implements Control
 		IncrementalStats is = new IncrementalStats();
 		
 		for (int i = 0 ; i < Network.size(); i++)
-			if (Network.get(i).isUp())
+			if (((SNNode)Network.get(i)).isOnline())
 				calculeteInDegree(Network.get(i), is);
 		
 		System.out.println(" " + CommonState.getTime() + " " + name + "stats: " + is);
@@ -113,11 +114,11 @@ public class DegreeObserver implements Control
 		LinkableSN linkable = (LinkableSN)rootNode.getProtocol(idle);
 		Set<Node> set = new HashSet<Node>();
 		for (int i = 0; i < linkable.degree(); i++){
-			if (linkable.getNeighbor(i).isUp())
+			if (((SNNode)linkable.getNeighbor(i)).isOnline())
 				set.add(linkable.getNeighbor(i));
 			LinkableSN rLinkable = (LinkableSN)linkable.getNeighbor(i).getProtocol(idle);
 			for (int j = 0; j < rLinkable.degree(); j++)
-				if (rLinkable.getNeighbor(j).isUp())
+				if (((SNNode)rLinkable.getNeighbor(j)).isOnline())
 					set.add(rLinkable.getNeighbor(j));
 		}
 		for (Node n : set)

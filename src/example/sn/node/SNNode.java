@@ -1,5 +1,6 @@
 package example.sn.node;
 
+import peersim.core.CommonState;
 import peersim.core.GeneralNode;
 
 public class SNNode extends GeneralNode
@@ -11,14 +12,21 @@ public class SNNode extends GeneralNode
 	{
 		super(n);
 		this.setOnline(true);
+		this.setFailState(OK);
 	}
 
 	public void setOnline(boolean isOnline) {
 		this.isOnline = isOnline;
+		this.setFailState(OK);
 	}
 
+	public boolean isOnline()
+	{
+		return this.isOnline;
+	}
+	
 	public boolean isUp() {
-		return isOnline;
+		return true; //isOnline;
 	}
 
 	public void setRealID(long realID) {

@@ -52,7 +52,7 @@ public class DisseminationObserver implements Control
 
 		for (int i = 0; i < Network.size(); i++){
 			n = Network.get(i);
-			if (n.isUp()){
+			if (((SNNode)n).isOnline()){
 				//News list
 				news = ((NewsManager)n.getProtocol(pidNews)).getOwnNews(n);
 
@@ -61,12 +61,12 @@ public class DisseminationObserver implements Control
 
 				for (int j = 0; j < news.size(); j++) {
 					News nw = news.get(j);
-					know = 0;
-					friendsNo = 0;
+					know = 1;
+					friendsNo = 1;
 
 					friends = idle.getFriends(n, n);
 					for (NodeEntry ne : friends){
-						if (ne.n.isUp()){
+						if (((SNNode)ne.n).isOnline()){
 							if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw))
 								know++;
 							friendsNo++;
@@ -75,7 +75,7 @@ public class DisseminationObserver implements Control
 						if (!(nw instanceof NewsStatusChange)){
 							fFriends = ((LinkableSN)ne.n.getProtocol(pidIdle)).getFriends(ne.n, ne.n);	
 							for (NodeEntry ne1 : fFriends)
-								if (ne1.n.isUp()){
+								if (((SNNode)ne1.n).isOnline()){
 									if (((NewsManager)ne1.n.getProtocol(pidNews)).contains(nw))
 										know++;
 									friendsNo++;
@@ -83,8 +83,10 @@ public class DisseminationObserver implements Control
 						}
 					}
 
-					System.out.println(CommonState.getTime() + " " + name + ": message " + j + " node " + n.getID() + " " + ((SNNode)n).getRealID() + " nodes " + friendsNo + " know " + know + " perc " + ((double)know/(double)friendsNo));
-					stats.add((double)know / (double)friendsNo);
+					if (friendsNo > 0){
+						System.out.println(CommonState.getTime() + " " + name + ": message " + j + " node " + n.getID() + " " + ((SNNode)n).getRealID() + " nodes " + friendsNo + " know " + know + " perc " + ((double)know/(double)friendsNo));
+						stats.add((double)know / (double)friendsNo);
+					}
 				}
 			}
 		}
