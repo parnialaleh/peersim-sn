@@ -1,6 +1,7 @@
 package example.sn.epidemic.control;
 
 import example.sn.EpidemicNews;
+import example.sn.node.SNNode;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.Node;
@@ -28,6 +29,8 @@ public class AntiEntrophy implements CDProtocol {
 
 	public void nextCycle(Node node, int protocolID)
 	{
+		if (!((SNNode)node).isOnline()) return;
+		
 		((EpidemicNews)node.getProtocol(pidEpidemic)).setInfected(true);
 	}
 

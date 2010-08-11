@@ -1,5 +1,8 @@
 package example.sn;
 
+import java.security.MessageDigest;
+import java.util.List;
+
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
@@ -8,6 +11,7 @@ import peersim.extras.am.epidemic.Message;
 import peersim.extras.am.epidemic.bcast.Infectable;
 import example.sn.epidemic.message.EpidemicHashMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
+import example.sn.epidemic.message.News;
 import example.sn.linkable.LinkableSN;
 
 public class EpidemicNews implements EpidemicProtocol, Infectable
@@ -54,12 +58,28 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 		boolean res = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
 
 		//unnecessary contact
-		if (!res){
+		if (!res && infected){
 			//lose interest with probability k (BLIND and COUNTER)
 			infected = (CommonState.r.nextDouble() <= k);
 		}
-		else		
+		else if (res)
 			infected =  true;
+	}
+	
+	private boolean cmpList(List<News> l1, List<News> l2)
+	{
+		if (l1.size() != l2.size())
+			return false;
+		
+		for (News n : l1)
+			if (!l2.contains(n))
+				return false;
+		
+		for (News n : l2)
+			if (!l1.contains(n))
+				return false;
+		
+		return true;
 	}
 
 	public Message prepareRequest(Node lnode, Node rnode) {
@@ -67,16 +87,22 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 			return null;
 
 		if (hash_message)
-			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode());
+			return new EpidemicHashMessage(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode));
 
-		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode), true);
+		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode, pidNewsManger), true);
 	}
 
-	public Message prepareResponse(Node lnode, Node rnode, Message request) {
-		if ((request instanceof EpidemicHashMessage) && ((EpidemicHashMessage)request).getStatus())
-			return new EpidemicHashMessage(false, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode());
-
-		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode), (request instanceof EpidemicHashMessage));
+	public Message prepareResponse(Node lnode, Node rnode, Message request) {		
+		if ((request instanceof EpidemicHashMessage) && ((EpidemicHashMessage)request).getStatus()){
+			//return new EpidemicHashMessage(false, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode).hashCode());
+			List<News> list = ((NewsManager)lnode.getProtocol(pidNewsManger)).getOwnNews(lnode);
+			if (!cmpList(list, ((EpidemicHashMessage)request).getList()))
+				return new EpidemicHashMessage(false, ((NewsManager)lnode.getProtocol(pidNewsManger)).getOwnNews(lnode));
+		}
+		else if ((request instanceof EpidemicHashMessage) && !((EpidemicHashMessage)request).getStatus())
+			return new EpidemicWholeMessages(false, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode, pidNewsManger), (request instanceof EpidemicHashMessage));
+		
+		return null;
 	}
 
 	/*private boolean isInList(Node n, List<News> list)

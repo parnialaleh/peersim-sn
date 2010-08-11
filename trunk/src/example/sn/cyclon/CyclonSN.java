@@ -365,6 +365,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 
 	public void processEvent(Node node, int pid, Object event)
 	{
+		if (!((SNNode)node).isOnline()) return;
+		
 		CyclonMessage message = (CyclonMessage) event;
 
 		List<CyclonEntry> nodesToSend = null;
@@ -450,6 +452,8 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 
 	public void nextCycle(Node node, int protocolID)
 	{
+		if (!((SNNode)node).isOnline()) return;
+		
 		if (inDegree == 0)
 			calculateInDegree(node);
 
@@ -587,6 +591,7 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	@Override
 	public void clearCache()
 	{
+		System.err.println(CommonState.getTime() + " CLEAR " + cache.size());
 		this.cache.clear();
 	}
 }

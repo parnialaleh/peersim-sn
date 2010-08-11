@@ -57,7 +57,7 @@ public class OscillatingSocialNetwork implements Control
 		offLineNodes = new ArrayList<SNNode>();
 		onLineNodes = new ArrayList<SNNode>();
 		for (int i = 0; i < Network.size(); i++)
-			if (Network.get(i).isUp())
+			if (((SNNode)Network.get(i)).isOnline())
 				onLineNodes.add((SNNode)Network.get(i));
 			else
 				offLineNodes.add((SNNode)Network.get(i));
@@ -79,6 +79,9 @@ public class OscillatingSocialNetwork implements Control
 			SNNode node = offLineNodes.remove(j);
 			node.setOnline(true);
 			onLineNodes.add(node);
+			
+			System.err.println("ONLINE " + node.getID());
+			
 			for (int k = 0; k < inits.length; ++k) {
 				inits[k].initialize(node);
 			}
@@ -92,7 +95,7 @@ public class OscillatingSocialNetwork implements Control
 			int j = CommonState.r.nextInt(onLineNodes.size());
 			SNNode node = onLineNodes.remove(j);
 			node.setOnline(false);
-			offLineNodes.add(node);	
+			offLineNodes.add(node);
 		}
 	}
 

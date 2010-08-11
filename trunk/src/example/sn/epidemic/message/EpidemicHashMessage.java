@@ -1,20 +1,22 @@
 package example.sn.epidemic.message;
 
+import java.util.List;
+
 import peersim.extras.am.epidemic.bcast.InfectionMessage;
 
 public class EpidemicHashMessage extends InfectionMessage
 {
-	private int hashcode = 0;
+	private List<News> list = null;
 
 
-	public EpidemicHashMessage(boolean status, int hashcode) {
+	public EpidemicHashMessage(boolean status, List<News> list) {
 		super(status);
-		this.hashcode = hashcode;
+		this.list = list;
 	}
 	
-	public int getHashcode()
+	public List<News> getList()
 	{
-		return this.hashcode;
+		return this.list;
 	}
 
 }

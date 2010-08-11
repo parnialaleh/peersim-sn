@@ -27,6 +27,8 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 
 	public void processEvent(Node lnode, int thisPid, Object event)
 	{
+		if (!((SNNode)lnode).isOnline()) return;
+		
 		if (event instanceof Integer) {
 			EDSimulator.add(c.period, (Integer) event, lnode, thisPid);
 			if (CommonState.getTime() >= start)
@@ -53,6 +55,8 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 			request.setSender(lnode);
 			Transport tr = (Transport) lnode.getProtocol(c.tid);
 			tr.send(lnode, rnode, request, thisPid);
+			
+			//System.err.println("SEND " + lnode.getID() + "->" + rnode.getID());
 		}
 	}
 
@@ -70,6 +74,8 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 				reply.setSender(lnode);
 				Transport tr = (Transport) lnode.getProtocol(c.tid);
 				tr.send(lnode, msg.getSender(), reply, thisPid);
+				
+				//System.err.println("SEND " + lnode.getID() + "->" + msg.getSender().getID());
 			}
 		}
 		if (!(msg instanceof EpidemicHashMessage))

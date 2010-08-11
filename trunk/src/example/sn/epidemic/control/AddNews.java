@@ -15,6 +15,7 @@ import example.sn.epidemic.message.NewsComment;
 import example.sn.epidemic.message.NewsFriendship;
 import example.sn.epidemic.message.NewsStatusChange;
 import example.sn.linkable.LinkableSN;
+import example.sn.node.SNNode;
 
 public class AddNews implements Control
 {
@@ -45,19 +46,19 @@ public class AddNews implements Control
 		//this.root = Configuration.getLong(n + "." + PAR_ROOT);
 	}
 
-	/*private int indexOf(long nodeRealID)
+	private int indexOf(long nodeRealID)
 	{
 		for (int i = 0; i < Network.size(); i++)
 			if (((SNNode)Network.get(i)).getRealID() == nodeRealID)
 				return i;
 
 		return -1;
-	}*/
+	}
 
 	private int getUpRandomNode(List<Node> network)
 	{
 		int i = CommonState.r.nextInt(network.size());
-		while (network.size() > 0 && Network.get(i).isUp() == false){
+		while (network.size() > 0 && ((SNNode)Network.get(i)).isOnline() == false){
 			network.remove(i);
 			i = CommonState.r.nextInt(network.size());
 		}
@@ -78,10 +79,10 @@ public class AddNews implements Control
 		int i;
 		NewsManager newsManager;
 		while (s.size() < statusChangeNo){
-			//i = CommonState.r.nextInt(size);
 			i = getUpRandomNode(network);
 			//i = indexOf(root);
-			if (!s.contains(i) && Network.get(i).isUp() && ((LinkableSN)Network.get(i).getProtocol(pidIdle)).degree() > 20){
+			//i = indexOf(1533106118);
+			if (!s.contains(i) && ((SNNode)Network.get(i)).isOnline() && ((LinkableSN)Network.get(i).getProtocol(pidIdle)).degree() > 20){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				newsManager.addNews(new NewsStatusChange(Network.get(i)), Network.get(i));
 				s.add(i);
@@ -92,7 +93,7 @@ public class AddNews implements Control
 		while (s.size() < commentNo){
 			//i = CommonState.r.nextInt(size);
 			i = getUpRandomNode(network);
-			if (!s.contains(i) && Network.get(i).isUp()){
+			if (!s.contains(i) && ((SNNode)Network.get(i)).isOnline()){
 				newsManager = (NewsManager)Network.get(i).getProtocol(pidNewsManager);
 				Node rnode = ((LinkableSN)Network.get(i).getProtocol(pidIdle)).getFriendPeer(Network.get(i), Network.get(i));
 				if (rnode != null){
