@@ -1,20 +1,26 @@
 package example.sn.epidemic.control;
 
-import example.sn.EpidemicNews;
-import example.sn.node.SNNode;
-import peersim.cdsim.CDProtocol;
+import example.sn.NewsManager;
+import example.sn.epidemic.message.EpidemicHashMessage;
+import example.sn.epidemic.message.EpidemicWholeMessages;
+import example.sn.linkable.LinkableSN;
 import peersim.config.Configuration;
 import peersim.core.Node;
+import peersim.extras.am.epidemic.EpidemicProtocol;
+import peersim.extras.am.epidemic.Message;
 
-public class AntiEntrophy implements CDProtocol {
-
-	private static final String PAR_PROT_EPIDEMIC = "epidemic";
+public class AntiEntrophy implements EpidemicProtocol
+{
+	private static final String PAR_GOSSIP = "protocol.gossip";
+	private static final String PAR_NEWS_MANAGER = "protocol.news_manager";
 	
-	private final int pidEpidemic;
+	protected final int pidGossip;
+	protected final int pidNewsManger;
 	
 	public AntiEntrophy(String n)
 	{
-		this.pidEpidemic = Configuration.getPid(n + "." + PAR_PROT_EPIDEMIC);
+		this.pidNewsManger = Configuration.getPid(n + "." + PAR_NEWS_MANAGER);
+		this.pidGossip = Configuration.getPid(n + "." + PAR_GOSSIP);
 	}
 	
 	@Override
@@ -27,11 +33,24 @@ public class AntiEntrophy implements CDProtocol {
 		return a;
 	}
 
-	public void nextCycle(Node node, int protocolID)
+	public void merge(Node lnode, Node rnode, Message msg)
 	{
-		if (!((SNNode)node).isOnline()) return;
-		
-		((EpidemicNews)node.getProtocol(pidEpidemic)).setInfected(true);
+		((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());		
+	}
+
+	public Message prepareRequest(Node lnode, Node rnode)
+	{
+		return new EpidemicWholeMessages(true, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode, pidNewsManger), true);
+	}
+
+	public Message prepareResponse(Node lnode, Node rnode, Message request)
+	{
+		return new EpidemicWholeMessages(false, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode, pidNewsManger), (request instanceof EpidemicHashMessage));
+	}
+
+	public Node selectPeer(Node lnode)
+	{
+		return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
 	}
 
 }
