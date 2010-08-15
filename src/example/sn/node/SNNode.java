@@ -1,6 +1,5 @@
 package example.sn.node;
 
-import peersim.core.CommonState;
 import peersim.core.GeneralNode;
 
 public class SNNode extends GeneralNode
