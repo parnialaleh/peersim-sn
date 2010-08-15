@@ -1,6 +1,7 @@
 package example.sn.epidemic;
 
 import example.sn.epidemic.message.EpidemicHashMessage;
+import example.sn.epidemic.message.EpidemicResponseMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
 import example.sn.node.SNNode;
 import peersim.config.Configuration;
@@ -69,7 +70,7 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 			InfectionMessage reply = (InfectionMessage)lpeer.prepareResponse(lnode, msg.getSender(), msg);
 			if (reply != null) {
 				reply.setPid(pid);
-				boolean isRequest = reply instanceof EpidemicHashMessage || ((reply instanceof EpidemicWholeMessages) && ((EpidemicWholeMessages)reply).isFirst());
+				boolean isRequest = reply instanceof EpidemicHashMessage ||  reply instanceof EpidemicResponseMessage || ((reply instanceof EpidemicWholeMessages) && ((EpidemicWholeMessages)reply).isFirst());
 				reply.setRequest(isRequest);
 				reply.setSender(lnode);
 				Transport tr = (Transport) lnode.getProtocol(c.tid);
@@ -78,7 +79,7 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 				//System.err.println("SEND " + lnode.getID() + "->" + msg.getSender().getID());
 			}
 		}
-		if (!(msg instanceof EpidemicHashMessage))
+		if (msg instanceof EpidemicWholeMessages)
 			lpeer.merge(lnode, msg.getSender(), msg);
 	}
 

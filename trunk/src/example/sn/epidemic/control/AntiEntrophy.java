@@ -1,5 +1,6 @@
 package example.sn.epidemic.control;
 
+import example.sn.EpidemicNews;
 import example.sn.NewsManager;
 import example.sn.epidemic.message.EpidemicHashMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
@@ -13,14 +14,17 @@ public class AntiEntrophy implements EpidemicProtocol
 {
 	private static final String PAR_GOSSIP = "protocol.gossip";
 	private static final String PAR_NEWS_MANAGER = "protocol.news_manager";
+	private static final String PAR_RUMOR_MONGERING = "protocol.rumor_mongering";
 	
 	protected final int pidGossip;
 	protected final int pidNewsManger;
+	protected final int pidRumorMongering;
 	
 	public AntiEntrophy(String n)
 	{
 		this.pidNewsManger = Configuration.getPid(n + "." + PAR_NEWS_MANAGER);
 		this.pidGossip = Configuration.getPid(n + "." + PAR_GOSSIP);
+		this.pidRumorMongering = Configuration.getPid(n + "." + PAR_RUMOR_MONGERING);
 	}
 	
 	@Override
@@ -35,7 +39,8 @@ public class AntiEntrophy implements EpidemicProtocol
 
 	public void merge(Node lnode, Node rnode, Message msg)
 	{
-		((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());		
+		if (((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages()))
+			((EpidemicNews)lnode.getProtocol(pidRumorMongering)).setInfected(true);
 	}
 
 	public Message prepareRequest(Node lnode, Node rnode)

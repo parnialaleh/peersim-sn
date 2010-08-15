@@ -58,6 +58,7 @@ public class Cyclon implements Linkable, EDProtocol, CDProtocol
 				i--;
 			
 			return cache.get(i);
+			//return cache.get(CommonState.r.nextInt(cache.size()));
 		} catch (Exception e){
 			return null;
 		}

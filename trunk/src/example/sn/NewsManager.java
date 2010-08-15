@@ -174,7 +174,7 @@ public class NewsManager implements EDProtocol
 		List<News> list = new ArrayList<News>();
 
 		for (News n: news)
-			if (n.getSourceNode().getID() == lnode.getID() || n.getDestNode().getID() == lnode.getID())
+			if (n.getSourceNode().getID() == lnode.getID())// || n.getDestNode().getID() == lnode.getID())
 				list.add(n);
 
 		return list;

@@ -57,13 +57,7 @@ public class AddNews implements Control
 
 	private int getUpRandomNode(List<Node> network)
 	{
-		int i = CommonState.r.nextInt(network.size());
-		while (network.size() > 0 && ((SNNode)Network.get(i)).isOnline() == false){
-			network.remove(i);
-			i = CommonState.r.nextInt(network.size());
-		}
-
-		return i;
+		return CommonState.r.nextInt(network.size());
 	}
 
 
@@ -73,8 +67,10 @@ public class AddNews implements Control
 		List<Node> network = new ArrayList<Node>();
 		Set<Integer> s = new HashSet<Integer>();
 
-		for (int i = 0; i < size; i++)
-			network.add(Network.get(i));
+		for (int i = 0; i < size; i++){
+			if (((SNNode)Network.get(i)).isOnline())
+				network.add(Network.get(i));
+		}
 
 		int i;
 		NewsManager newsManager;

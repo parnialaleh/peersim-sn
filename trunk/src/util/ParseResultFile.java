@@ -95,7 +95,7 @@ public class ParseResultFile
 						list.add(e);
 					}
 					
-					if (Integer.parseInt(split[10]) > 1000)				
+					//if (Integer.parseInt(split[10]) > 1000)				
 						list.get(index).addEntry(Long.parseLong(split[0]), Double.parseDouble(split[14]));
 
 					if (split[14].equals("1.0")){
