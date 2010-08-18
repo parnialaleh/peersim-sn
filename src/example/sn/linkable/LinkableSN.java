@@ -12,6 +12,7 @@ public abstract class LinkableSN implements Linkable
 {
 	public static final int FRIEND = 1;
 	public static final int FRIEND_FRIEND = 2;
+	protected int inDegree = 0;
 	
 	/**
 	 * Search in the cache the node n and check if it is a friend
@@ -48,6 +49,11 @@ public abstract class LinkableSN implements Linkable
 				friends.add(ne);
 		}
 		return friends.toArray(new NodeEntry[0]);
+	}
+	
+	public int getInDegree()
+	{
+		return this.inDegree;
 	}
 
 }

@@ -20,11 +20,9 @@ public class OscillatingSocialNetwork implements Control
 	
 	private static final String PAR_PERIOD = "period";
 	private static final String PAR_INIT = "init";
-	private static final String PAR_NEWS_MANAGER = "news";
 
 	private final int period;
 	private final int longPeriod;
-	private final int pidNews;
 	private final int maxMaxSize;
 	private final int maxMinSize;
 	private final int minMaxSize;
@@ -52,7 +50,6 @@ public class OscillatingSocialNetwork implements Control
 		
 		maxsize = maxMinSize;
 		minsize = maxsize / minMinSize;
-		this.pidNews = Configuration.getPid(prefix + "." + PAR_NEWS_MANAGER);
 		
 		offLineNodes = new ArrayList<SNNode>();
 		onLineNodes = new ArrayList<SNNode>();
@@ -85,7 +82,7 @@ public class OscillatingSocialNetwork implements Control
 			for (int k = 0; k < inits.length; ++k) {
 				inits[k].initialize(node);
 			}
-			((EpidemicNews)(node).getProtocol(pidNews)).setInfected(true);
+			
 		}
 	}
 

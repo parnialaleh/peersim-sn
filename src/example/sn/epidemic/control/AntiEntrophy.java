@@ -5,7 +5,9 @@ import example.sn.NewsManager;
 import example.sn.epidemic.message.EpidemicHashMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
 import example.sn.linkable.LinkableSN;
+import example.sn.node.SNNode;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.extras.am.epidemic.EpidemicProtocol;
 import peersim.extras.am.epidemic.Message;
@@ -55,6 +57,7 @@ public class AntiEntrophy implements EpidemicProtocol
 
 	public Node selectPeer(Node lnode)
 	{
+		System.out.println("ANTIENTROPY " + lnode.getID() + " " + ((SNNode)lnode).getID() + " " + CommonState.getIntTime());
 		return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
 	}
 

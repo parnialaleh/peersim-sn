@@ -13,6 +13,7 @@ import example.sn.epidemic.message.EpidemicResponseMessage;
 import example.sn.epidemic.message.EpidemicWholeMessages;
 import example.sn.epidemic.message.News;
 import example.sn.linkable.LinkableSN;
+import example.sn.node.SNNode;
 
 public class EpidemicNews implements EpidemicProtocol, Infectable
 {	
@@ -58,7 +59,7 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 		if (!res && infected && ((EpidemicWholeMessages)msg).isFirst()){
 			infected = CommonState.r.nextDouble() >= k;
 			if (!infected)
-				System.out.println("LOST INTEREST " + CommonState.getIntTime());
+				System.out.println("LOST INTEREST " + CommonState.getIntTime() + " " + lnode.getID() + " " + ((SNNode)lnode).getRealID());
 		}
 		else if (res)
 			infected = true;
@@ -101,8 +102,8 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 			//	return new EpidemicResponseMessage(false, false);
 		}
 		else if (request instanceof EpidemicWholeMessages){
-			List<News> list = ((NewsManager)lnode.getProtocol(pidNewsManger)).getOwnNews(lnode);
-			if (!cmpList(list, ((EpidemicWholeMessages)request).getMessages()))
+			//List<News> list = ((NewsManager)lnode.getProtocol(pidNewsManger)).getOwnNews(lnode);
+			//if (!cmpList(list, ((EpidemicWholeMessages)request).getMessages()))
 				return new EpidemicWholeMessages(false, ((NewsManager)lnode.getProtocol(pidNewsManger)).getNews(lnode, rnode, pidNewsManger), false);
 		}
 		/*else if ((request instanceof EpidemicResponseMessage) && ((EpidemicResponseMessage)request).isInterested())
