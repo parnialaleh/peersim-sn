@@ -47,12 +47,15 @@ public class DisseminationObserver implements Control
 		NodeEntry[] fFriends = null;
 		int know = 0;
 		int friendsNo = 0;
+		int globalKnow = 0;
+		int globalFriends = 0;
 
 		IncrementalStats stats = new IncrementalStats();
+		IncrementalStats stats2 = new IncrementalStats();
 
 		for (int i = 0; i < Network.size(); i++){
 			n = Network.get(i);
-			if (((SNNode)n).isOnline()){
+			//if (((SNNode)n).isOnline()){
 				//News list
 				news = ((NewsManager)n.getProtocol(pidNews)).getOwnNews(n);
 
@@ -61,37 +64,49 @@ public class DisseminationObserver implements Control
 
 				for (int j = 0; j < news.size(); j++) {
 					News nw = news.get(j);
-					know = 1;
-					friendsNo = 1;
+					know = 0;
+					friendsNo = 0;
+					globalKnow = 0;
+					globalFriends = 0;
 
 					friends = idle.getFriends(n, n);
 					for (NodeEntry ne : friends){
-						if (((SNNode)ne.n).isOnline()){
-							if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw))
+						if (((NewsManager)ne.n.getProtocol(pidNews)).contains(nw)){
+							if (((SNNode)ne.n).isOnline() && ((SNNode)n).isOnline())
 								know++;
-							friendsNo++;
+							globalKnow++;
 						}
+
+						if (((SNNode)ne.n).isOnline() && ((SNNode)n).isOnline())
+							friendsNo++;
+						globalFriends++;
 
 						if (!(nw instanceof NewsStatusChange)){
 							fFriends = ((LinkableSN)ne.n.getProtocol(pidIdle)).getFriends(ne.n, ne.n);	
-							for (NodeEntry ne1 : fFriends)
-								if (((SNNode)ne1.n).isOnline()){
-									if (((NewsManager)ne1.n.getProtocol(pidNews)).contains(nw))
+							for (NodeEntry ne1 : fFriends){
+								if (((NewsManager)ne1.n.getProtocol(pidNews)).contains(nw) && ((SNNode)n).isOnline()){
+									if (((SNNode)ne1.n).isOnline())
 										know++;
-									friendsNo++;
+									globalKnow++;
 								}
+								if (((SNNode)ne1.n).isOnline() && ((SNNode)n).isOnline())
+									friendsNo++;
+								globalFriends++;
+							}
 						}
 					}
 
 					if (friendsNo > 0){
-						System.out.println(CommonState.getTime() + " " + name + ": message " + j + " node " + n.getID() + " " + ((SNNode)n).getRealID() + " nodes " + friendsNo + " know " + know + " perc " + ((double)know/(double)friendsNo));
+						System.out.println(CommonState.getTime() + " " + name + ": message " + j + " node " + n.getID() + " " + ((SNNode)n).getRealID() + " nodes " + friendsNo + " know " + know + " perc " + ((double)know/(double)friendsNo) + " glonodes " + globalFriends + " gloKnow " + globalKnow + " gloperc " +  ((double)globalKnow/(double)globalFriends));
 						stats.add((double)know / (double)friendsNo);
+						stats2.add(((double)globalKnow/(double)globalFriends));
 					}
 				}
-			}
+			//}
 		}
 
 		System.out.println(CommonState.getTime() + " " + name + " stats: " + stats);
+		System.out.println(CommonState.getTime() + " " + name + " statsGlobal: " + stats2);
 
 		return false;
 	}

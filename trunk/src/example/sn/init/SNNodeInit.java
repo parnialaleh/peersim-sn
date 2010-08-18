@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import example.sn.linkable.LinkableSN;
+import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Linkable;
@@ -39,10 +40,11 @@ public class SNNodeInit implements NodeInitializer
 		
 		Set<Node> set = new HashSet<Node>();
 		for (int j = 0; j < idle.degree(); j++){
-			set.add(idle.getNeighbor(j));
+			if (((SNNode)idle.getNeighbor(j)).isOnline())
+				set.add(idle.getNeighbor(j));
 			idle2 = (LinkableSN)idle.getNeighbor(j).getProtocol(pIdle);
 			for (int k = 0; k < idle2.degree(); k++)
-				if (!idle2.getNeighbor(k).equals(node))
+				if (!idle2.getNeighbor(k).equals(node) && ((SNNode)idle2.getNeighbor(k)).isOnline())
 					set.add(idle2.getNeighbor(k));
 		}
 

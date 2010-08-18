@@ -28,10 +28,12 @@ public class EDEpidemicManagerMD5 extends EDEpidemicManager
 
 	public void processEvent(Node lnode, int thisPid, Object event)
 	{
+		if (event instanceof Integer)
+			EDSimulator.add(c.period, (Integer) event, lnode, thisPid);
+		
 		if (!((SNNode)lnode).isOnline()) return;
 		
 		if (event instanceof Integer) {
-			EDSimulator.add(c.period, (Integer) event, lnode, thisPid);
 			if (CommonState.getTime() >= start)
 				activeThread(lnode, (Integer) event, thisPid);
 		} else {

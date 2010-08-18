@@ -68,7 +68,7 @@ public class AddNews implements Control
 		Set<Integer> s = new HashSet<Integer>();
 
 		for (int i = 0; i < size; i++){
-			if (((SNNode)Network.get(i)).isOnline())
+			if (((SNNode)Network.get(i)).isOnline())// && ((LinkableSN)Network.get(i).getProtocol(pidNewscast)).getInDegree() > 30)
 				network.add(Network.get(i));
 		}
 

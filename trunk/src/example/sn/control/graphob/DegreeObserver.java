@@ -8,6 +8,7 @@ import example.sn.node.SNNode;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
+import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.util.IncrementalStats;
@@ -16,10 +17,12 @@ public class DegreeObserver implements Control
 {
 	private final static String PAR_PID = "protocol";
 	private final static String PAR_IDLE = "idle";
+	private static final String PAR_DEAD = "dead";
 
 	private final int pid;
 	private final int idle;
 	private final String name;
+	private final boolean dead;
 
 	protected class Entry{
 		public int inDegree;
@@ -48,11 +51,18 @@ public class DegreeObserver implements Control
 		}
 	}
 
+	private class Entry2
+	{
+		long nodeId;
+		int indegree;
+	}
+
 	public DegreeObserver(String prefix)
 	{
 		this.pid = Configuration.getPid(prefix + "." + PAR_PID);
 		this.idle = Configuration.getPid(prefix + "." + PAR_IDLE);
 		this.name = prefix;
+		this.dead = Configuration.contains(prefix + "." + PAR_DEAD);
 	}
 
 	/*private int indexOf(long nodeRealID)
@@ -67,14 +77,44 @@ public class DegreeObserver implements Control
 	public boolean execute()
 	{
 		IncrementalStats is = new IncrementalStats();
-		
+
 		for (int i = 0 ; i < Network.size(); i++)
 			if (((SNNode)Network.get(i)).isOnline())
 				calculeteInDegree(Network.get(i), is);
-		
+
 		System.out.println(" " + CommonState.getTime() + " " + name + "stats: " + is);
 
-		
+		if (!dead) return false;
+
+		Entry2[] entry = new Entry2[Network.size()];
+		for (int i = 0; i < Network.size(); i++)
+			if (((SNNode)Network.get(i)).isOnline()){
+				entry[i] = new Entry2();
+				entry[i].indegree = 0;
+				entry[i].nodeId = Network.get(i).getID();
+			}
+
+		int index = 0;
+		int degreeToDead = 0;
+		Set<Node> referredDeadNode = new HashSet<Node>();
+		for (int i = 0; i < Network.size(); i++){
+			Node n = Network.get(i);
+
+			if (((SNNode)n).isOnline()){
+				Linkable linkable = (Linkable)n.getProtocol(pid);
+				for (int j = 0; j < linkable.degree(); j++)
+					if ((index = indexOf(entry, linkable.getNeighbor(j).getID())) >= 0)
+						entry[index].indegree++;
+					else if (dead){
+						degreeToDead++;
+						referredDeadNode.add(linkable.getNeighbor(j));
+					}
+			}
+		}
+
+		System.out.println(CommonState.getIntTime() + " " + name + ": dead " + degreeToDead + " referred " + referredDeadNode.size());
+
+
 		/*Entry[] entry = new Entry[Network.size()];
 		for (int i = 0; i < Network.size(); i++){
 			entry[i] = new Entry();
@@ -100,7 +140,16 @@ public class DegreeObserver implements Control
 
 		return false;
 	}
-	
+
+
+	private int indexOf(Entry2[] entry, long id)
+	{
+		for (int i = 0; i < entry.length; i++)
+			if (entry[i] != null && entry[i].nodeId == id)
+				return i;
+		return -1;
+	}
+
 	private void calculeteInDegree(Node rootNode, IncrementalStats is)
 	{
 		//Node rootNode = Network.get(indexOf(AddNews.getRoot()));
@@ -132,7 +181,7 @@ public class DegreeObserver implements Control
 				if (((LinkableSN)rLinkable.getNeighbor(j).getProtocol(pid)).contains(rootNode))
 					indegree++;
 		}*/
-		
+
 		is.add(indegree);
 
 		System.out.println(" " + CommonState.getTime() + " " + name + ": simulDegree " + indegree + " SnInDegree " + snInDegree + " indegree " + set.size());

@@ -39,7 +39,6 @@ public class CyclonSN extends LinkableSN implements EDProtocol, CDProtocol
 	private final int idle;
 	//private final int step;
 	//private int lastStep = 0;
-	private int inDegree = 0;
 	private int noPeerCount = 0;
 	private final int maxEmptyCycles;
 	private final boolean countContact;
