@@ -57,7 +57,6 @@ public class AntiEntrophy implements EpidemicProtocol
 
 	public Node selectPeer(Node lnode)
 	{
-		System.out.println("ANTIENTROPY " + lnode.getID() + " " + ((SNNode)lnode).getID() + " " + CommonState.getIntTime());
 		return ((LinkableSN)(lnode.getProtocol(pidGossip))).getPeer(lnode);
 	}
 

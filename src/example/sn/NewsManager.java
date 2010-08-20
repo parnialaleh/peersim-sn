@@ -29,9 +29,14 @@ public class NewsManager implements EDProtocol
 {
 	private static final String PAR_IDLE_MANAGER = "idle";
 	private static final String PAR_EPIDEMIC = "epidemic";
+	
+	private static final String PAR_PRINT_STATS = "stats";
+	private static final String PAR_GOSSIP = "gossip";
 
 	protected final int pidIdle;
+	protected final int pidGossip;
 	protected final int pidEpidemic;
+	protected final boolean stats;
 
 	private List<News> news = null;
 
@@ -39,6 +44,10 @@ public class NewsManager implements EDProtocol
 	{
 		this.pidIdle = Configuration.getPid(n + "." + PAR_IDLE_MANAGER);
 		this.pidEpidemic = Configuration.getPid(n + "." + PAR_EPIDEMIC);
+		
+		this.pidGossip = Configuration.getPid(n + "." + PAR_GOSSIP, -1);
+		this.stats = Configuration.getBoolean(n + "." + PAR_PRINT_STATS, true);
+		
 		this.news = new ArrayList<News>();
 	}
 
@@ -62,7 +71,7 @@ public class NewsManager implements EDProtocol
 	{
 		this.news.add(news);
 		if (news instanceof NewsFriendship)
-			((NewscastED)n.getProtocol(pidIdle)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
+			((LinkableSN)n.getProtocol(pidIdle)).addNeighbor(Network.get(((NewsFriendship)news).getDestId()));
 
 		((EpidemicNews)n.getProtocol(pidEpidemic)).setInfected(true);
 	}
@@ -150,7 +159,8 @@ public class NewsManager implements EDProtocol
 			//			if (((LinkableSN)n.getSourceNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode) ||
 			//((LinkableSN)n.getDestNode().getProtocol(pidIdle)).containsAsFriend(n.getSourceNode(), rnode))
 			if (isInterestingNews(n, lnode, rnode) && !rNews.contains(n)){
-				System.out.println("OBSERVER " + n.getSourceNode().getID() + " " + n.getDestNode().getID() + " " + n.getEventTime() + " " + rnode.getID());
+				if (stats)
+					System.out.println(CommonState.getIntTime() + " send: " + n.getSourceNode().getID() + " " + n.getDestNode().getID() + " " + n.getEventTime() + " " + rnode.getID() + " indegree " +  ((LinkableSN)n.getSourceNode().getProtocol(pidGossip)).getInDegree() + " " + lnode.getID());
 				list.add(n);
 			}
 		/*if (n.getNode().getID() == lnode.getID() || ((LinkableSN)lnode.getProtocol(pidNetworkManger)).containsAsFriend(n.getNode()) || ((LinkableSN)lnode.getProtocol(pidIdle)).containsAsFriend(n.getNode()))

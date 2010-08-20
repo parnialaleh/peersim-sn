@@ -56,11 +56,8 @@ public class EpidemicNews implements EpidemicProtocol, Infectable
 
 	public void merge(Node lnode, Node rnode, Message msg) {
 		boolean res = ((NewsManager)lnode.getProtocol(pidNewsManger)).merge(((EpidemicWholeMessages)msg).getMessages());
-		if (!res && infected && ((EpidemicWholeMessages)msg).isFirst()){
+		if (!res && infected && ((EpidemicWholeMessages)msg).isFirst())
 			infected = CommonState.r.nextDouble() >= k;
-			if (!infected)
-				System.out.println("LOST INTEREST " + CommonState.getIntTime() + " " + lnode.getID() + " " + ((SNNode)lnode).getRealID());
-		}
 		else if (res)
 			infected = true;
 
