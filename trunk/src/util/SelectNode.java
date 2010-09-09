@@ -52,7 +52,7 @@ public class SelectNode
 		
 	}
 	
-	public SelectNode(String file)
+	public SelectNode(String file, int idPos, int degreePos)
 	{
 		
 		BufferedReader br = null;
@@ -74,8 +74,8 @@ public class SelectNode
 		try {
 			while ((line = br.readLine()) != null){ 
 				split = line.split(" ");
-				id = Long.parseLong(split[0]);
-				degree = Integer.parseInt(split[1]);
+				id = Long.parseLong(split[idPos]);
+				degree = Integer.parseInt(split[degreePos]);
 				
 				if ((tmp = indexOf(list, id)) == null)
 					tmp = new Node(id, degree);
@@ -93,7 +93,7 @@ public class SelectNode
 	
 	public static void main(String[] args)
 	{
-		new SelectNode(args[0]);
+		new SelectNode(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 	}
 
 }
